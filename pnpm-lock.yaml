@@ -13,7 +13,7 @@ importers:
         version: 2.4.8
       '@l4n3/biome-config':
         specifier: workspace:*
-        version: link:packages/biome-config
+        version: link:configs/biome
       '@typescript/native-preview':
         specifier: ^7.0.0-dev
         version: 7.0.0-dev.20260324.1
@@ -24,7 +24,9 @@ importers:
         specifier: ^2.8.20
         version: 2.8.20
 
-  packages/biome-config: {}
+  configs/biome: {}
+
+  configs/typescript: {}
 
   packages/poc-utils:
     devDependencies:
@@ -33,15 +35,13 @@ importers:
         version: 2.4.8
       '@l4n3/biome-config':
         specifier: workspace:*
-        version: link:../biome-config
+        version: link:../../configs/biome
       '@l4n3/tsconfig':
         specifier: workspace:*
-        version: link:../tsconfig
+        version: link:../../configs/typescript
       '@typescript/native-preview':
         specifier: ^7.0.0-dev
         version: 7.0.0-dev.20260324.1
-
-  packages/tsconfig: {}
 
 packages:
 
