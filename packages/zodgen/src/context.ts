@@ -14,14 +14,14 @@ export const createCheckSet = (checks: ReadonlyArray<z.core.$ZodCheck>): CheckSe
 const extractChecks = <S extends z.ZodType>(schema: S): ReadonlyArray<z.core.$ZodCheck> =>
   (schema.def.checks ?? []) as ReadonlyArray<z.core.$ZodCheck>;
 
-export const createContext = <S extends z.ZodType>(
-  schema: S,
+export const createContext = <T>(
+  schema: z.ZodType<T>,
   config: GeneratorConfig,
   path: ReadonlyArray<string>,
   depth: number,
   faker: Faker,
-  generate: <T>(schema: z.ZodType<T>, key?: string) => T,
-): GenContext => ({
+  generate: (schema: z.ZodType<T>, key?: string) => T,
+): GenContext<T> => ({
   schema,
   path,
   depth,

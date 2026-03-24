@@ -1,0 +1,30 @@
+{
+  "name": "@l4n3/zodgen-usage",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsgo --build",
+    "check": "tsgo --noEmit",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@faker-js/faker": "^9.0.0",
+    "@l4n3/zodgen": "workspace:*",
+    "zod": "^4.0.0-beta.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.8",
+    "@l4n3/biome-config": "workspace:*",
+    "@l4n3/tsconfig": "workspace:*",
+    "@typescript/native-preview": "^7.0.0-dev"
+  }
+}

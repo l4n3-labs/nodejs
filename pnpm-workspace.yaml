@@ -1,6 +1,8 @@
 packages:
   - "packages/*"
   - "configs/*"
+  - "examples/*"
+  - "utils/*"
 
 onlyBuiltDependencies:
   - lefthook

@@ -1,5 +1,5 @@
-import type { Faker } from '@faker-js/faker';
-import type { z } from 'zod/v4';
+import type { Faker } from "@faker-js/faker";
+import type { z } from "zod/v4";
 
 // --- Config ---
 
@@ -10,12 +10,12 @@ export type GeneratorConfig = {
 
 // --- Overrides ---
 
-export type Override = {
-  readonly matcher: OverrideMatcher;
-  readonly generate: (ctx: GenContext) => unknown;
+export type Override<T> = {
+  readonly matcher: OverrideMatcher<T>;
+  readonly generate: (ctx: GenContext<T>) => T;
 };
 
-export type OverrideMatcher = string | ((ctx: GenContext) => boolean);
+export type OverrideMatcher<T> = string | ((ctx: GenContext<T>) => boolean);
 
 // --- Check types ---
 
@@ -51,19 +51,19 @@ export type CheckSet = {
 
 // --- Generation Context ---
 
-export type GenContext = {
-  readonly schema: z.ZodType;
+export type GenContext<T> = {
+  readonly schema: z.ZodType<T>;
   readonly path: ReadonlyArray<string>;
   readonly depth: number;
   readonly faker: Faker;
   readonly config: GeneratorConfig;
   readonly checks: CheckSet;
-  readonly generate: <T>(schema: z.ZodType<T>, key?: string) => T;
+  readonly generate: (schema: z.ZodType<T>, key?: string) => T;
 };
 
 // --- Generator ---
 
-export type Generator = (ctx: GenContext) => unknown;
+export type Generator = <T>(ctx: GenContext<T>) => T;
 
 // --- Transform ---
 
@@ -79,3 +79,6 @@ export type FixtureGenerator = {
 export type FixtureOptions = {
   readonly seed?: number;
 };
+
+// --- Helpers ---
+export type Optional<Value> = Exclude<Value, null> | undefined;

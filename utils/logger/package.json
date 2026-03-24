@@ -1,0 +1,33 @@
+{
+  "name": "@l4n3/logger",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsgo --build",
+    "check": "tsgo --noEmit",
+    "test": "vitest run",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "pino": "^9.0.0",
+    "pino-pretty": "^13.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.8",
+    "@types/node": "^22.0.0",
+    "@l4n3/biome-config": "workspace:*",
+    "@l4n3/tsconfig": "workspace:*",
+    "@l4n3/vitest-config": "workspace:*",
+    "@typescript/native-preview": "^7.0.0-dev",
+    "vitest": "^3.2.1"
+  }
+}

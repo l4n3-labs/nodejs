@@ -30,11 +30,11 @@ const createTestFaker = (seed?: number): Faker => {
 
 const testConfig: GeneratorConfig = { seed: undefined, overrides: [] };
 
-const stubGenerate: GenContext['generate'] = (_s, _key?) => {
+const stubGenerate = () => {
   throw new Error('not implemented');
 };
 
-const createTestCtx = (schema: z.ZodType, faker?: Faker): GenContext =>
+const createTestCtx = <T>(schema: z.ZodType<T>, faker?: Faker): GenContext<T> =>
   createContext(schema, testConfig, [], 0, faker ?? createTestFaker(), stubGenerate);
 
 // --- generateString ---

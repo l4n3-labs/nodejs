@@ -22,20 +22,21 @@ const createTestFaker = (seed?: number): Faker => {
 
 const testConfig: GeneratorConfig = { seed: undefined, overrides: [] };
 
-const createRecursiveCtx = (
-  schema: z.ZodType,
-  generate: (s: z.ZodType, key?: string) => unknown,
+const createRecursiveCtx = <T>(
+  schema: z.ZodType<T>,
+  generate: (s: z.ZodType<T>, key?: string) => T,
   faker?: Faker,
   depth = 0,
-): GenContext =>
-  createContext(schema, testConfig, [], depth, faker ?? createTestFaker(), generate as GenContext['generate']);
+): GenContext<T> => createContext(schema, testConfig, [], depth, faker ?? createTestFaker(), generate);
 
-// A simple dispatcher for tests that need recursive generation
-const makeDispatch = (faker: Faker): GenContext['generate'] => {
+// biome-ignore lint/suspicious/noExplicitAny: test dispatch handles all schema types dynamically
+const makeDispatch = (faker: Faker): any => {
   const dispatch = (schema: z.ZodType): unknown => {
-    const def = (schema as any)._zod.def;
-    const type: string = def.type;
-    const ctx = createContext(schema, testConfig, [], 0, faker, dispatch as GenContext['generate']);
+    // biome-ignore lint/suspicious/noExplicitAny: dynamic def access across all schema types
+    const def = schema._zod.def as any;
+    const type = def.type;
+    // biome-ignore lint/suspicious/noExplicitAny: loosely typed test context
+    const ctx = createContext(schema, testConfig, [], 0, faker, dispatch as any);
     switch (type) {
       case 'string':
         return faker.lorem.word();
@@ -46,25 +47,35 @@ const makeDispatch = (faker: Faker): GenContext['generate'] => {
       case 'literal':
         return def.values[0];
       case 'union':
-        return generateUnion(ctx);
+        // biome-ignore lint/suspicious/noExplicitAny: test utility
+        return generateUnion(ctx as any);
       case 'intersection':
-        return generateIntersection(ctx);
+        // biome-ignore lint/suspicious/noExplicitAny: test utility
+        return generateIntersection(ctx as any);
       case 'nullable':
-        return generateNullable(ctx);
+        // biome-ignore lint/suspicious/noExplicitAny: test utility
+        return generateNullable(ctx as any);
       case 'optional':
-        return generateOptional(ctx);
+        // biome-ignore lint/suspicious/noExplicitAny: test utility
+        return generateOptional(ctx as any);
       case 'default':
-        return generateDefault(ctx);
+        // biome-ignore lint/suspicious/noExplicitAny: test utility
+        return generateDefault(ctx as any);
       case 'readonly':
-        return generateReadonly(ctx);
+        // biome-ignore lint/suspicious/noExplicitAny: test utility
+        return generateReadonly(ctx as any);
       case 'catch':
-        return generateCatch(ctx);
+        // biome-ignore lint/suspicious/noExplicitAny: test utility
+        return generateCatch(ctx as any);
       case 'lazy':
-        return generateLazy(ctx);
+        // biome-ignore lint/suspicious/noExplicitAny: test utility
+        return generateLazy(ctx as any);
       case 'promise':
-        return generatePromise(ctx);
+        // biome-ignore lint/suspicious/noExplicitAny: test utility
+        return generatePromise(ctx as any);
       case 'pipe':
-        return generatePipe(ctx);
+        // biome-ignore lint/suspicious/noExplicitAny: test utility
+        return generatePipe(ctx as any);
       case 'object': {
         const shape = def.shape as Record<string, z.ZodType>;
         return Object.fromEntries(Object.entries(shape).map(([k, s]) => [k, dispatch(s)]));
@@ -73,7 +84,7 @@ const makeDispatch = (faker: Faker): GenContext['generate'] => {
         return null;
     }
   };
-  return dispatch as GenContext['generate'];
+  return dispatch;
 };
 
 describe('generateUnion', () => {

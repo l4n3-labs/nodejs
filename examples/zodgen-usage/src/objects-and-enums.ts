@@ -1,0 +1,46 @@
+import { fixture } from '@l4n3/zodgen';
+import { z } from 'zod';
+
+// Enums
+
+const roleSchema = z.enum(['admin', 'editor', 'viewer']);
+const role = fixture(roleSchema);
+console.log('role:', role);
+
+// Simple object
+
+const userSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  age: z.number().int().min(18).max(99),
+  role: roleSchema,
+  active: z.boolean(),
+});
+
+const user = fixture(userSchema);
+console.log('user:', user);
+
+// Nested objects
+
+const companySchema = z.object({
+  name: z.string(),
+  founded: z.date(),
+  ceo: z.object({
+    name: z.string(),
+    email: z.string().email(),
+  }),
+  address: z.object({
+    street: z.string(),
+    city: z.string(),
+    zip: z.string().length(5),
+    country: z.literal('US'),
+  }),
+});
+
+const company = fixture(companySchema);
+console.log('company:', JSON.stringify(company, null, 2));
+
+// Generate multiple objects
+
+const users = fixture.many(userSchema, 3);
+console.log('3 users:', JSON.stringify(users, null, 2));
