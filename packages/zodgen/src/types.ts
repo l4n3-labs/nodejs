@@ -17,29 +17,36 @@ export type Override = {
 
 export type OverrideMatcher = string | ((ctx: GenContext) => boolean);
 
-// --- Check internals ---
-// Zod v4 checks are objects with a non-enumerable `_zod` property.
-// The check discrimination field is `_zod.def.check` (e.g. 'min_length', 'max_length',
-// 'greater_than', 'less_than', 'string_format', 'number_format', etc.)
-// String format checks (email, url, uuid, regex) use check: 'string_format' with a `format` field.
+// --- Check types ---
 
-export type ZodCheckDef = {
-  readonly check: string;
-  readonly [key: string]: unknown;
-};
+export type ZodCheckDef = z.core.$ZodCheckDef;
 
-export type ZodCheckInternal = {
-  readonly _zod: {
-    readonly def: ZodCheckDef;
-  };
+// --- Check type map ---
+// Maps Zod v4 check names to their typed def interfaces.
+// Used by CheckSet.find to return narrowed types instead of a generic base.
+
+type CheckDefMap = {
+  readonly greater_than: z.core.$ZodCheckGreaterThanDef;
+  readonly less_than: z.core.$ZodCheckLessThanDef;
+  readonly multiple_of: z.core.$ZodCheckMultipleOfDef;
+  readonly number_format: z.core.$ZodCheckNumberFormatDef;
+  readonly string_format: z.core.$ZodCheckStringFormatDef;
+  readonly min_length: z.core.$ZodCheckMinLengthDef;
+  readonly max_length: z.core.$ZodCheckMaxLengthDef;
+  readonly length_equals: z.core.$ZodCheckLengthEqualsDef;
+  readonly min_size: z.core.$ZodCheckMinSizeDef;
+  readonly max_size: z.core.$ZodCheckMaxSizeDef;
+  readonly size_equals: z.core.$ZodCheckSizeEqualsDef;
 };
 
 // --- Check Queries ---
 
 export type CheckSet = {
   readonly has: (check: string) => boolean;
-  readonly find: (check: string) => ZodCheckDef | undefined;
-  readonly all: () => ReadonlyArray<ZodCheckDef>;
+  readonly find: <K extends string>(
+    check: K,
+  ) => (K extends keyof CheckDefMap ? CheckDefMap[K] : z.core.$ZodCheckDef) | undefined;
+  readonly all: () => ReadonlyArray<z.core.$ZodCheckDef>;
 };
 
 // --- Generation Context ---

@@ -1,8 +1,9 @@
 import type { z } from 'zod/v4';
+import { schemaDef } from '../schema-def.js';
 import type { GenContext } from '../types.js';
 
 export const generateTemplateLiteral = (ctx: GenContext): string => {
-  const parts = (ctx.schema as any)._zod.def.parts as unknown[];
+  const { parts } = schemaDef<z.core.$ZodTemplateLiteralDef>(ctx.schema);
 
   return parts
     .map((part) => {

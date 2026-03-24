@@ -1,9 +1,10 @@
-import type { GenContext, ZodCheckDef } from '../types.js';
+import type { z } from 'zod/v4';
+import type { GenContext } from '../types.js';
 
 // In Zod v4, startsWith/endsWith/includes are all string_format checks.
 // We need to collect all string_format checks and handle them together.
-const findAllFormats = (ctx: GenContext): ReadonlyArray<ZodCheckDef> =>
-  ctx.checks.all().filter((c) => c.check === 'string_format');
+const findAllFormats = (ctx: GenContext): ReadonlyArray<z.core.$ZodCheckStringFormatDef> =>
+  ctx.checks.all().filter((c): c is z.core.$ZodCheckStringFormatDef => c.check === 'string_format');
 
 export const generateString = (ctx: GenContext): string => {
   const { faker, checks } = ctx;
@@ -11,9 +12,9 @@ export const generateString = (ctx: GenContext): string => {
   const formats = findAllFormats(ctx);
 
   // Collect content constraints from string_format checks
-  const prefix = formats.find((f) => f.format === 'starts_with')?.prefix as string | undefined;
-  const suffix = formats.find((f) => f.format === 'ends_with')?.suffix as string | undefined;
-  const include = formats.find((f) => f.format === 'includes')?.includes as string | undefined;
+  const prefix = formats.find((f): f is z.core.$ZodCheckStartsWithDef => f.format === 'starts_with')?.prefix;
+  const suffix = formats.find((f): f is z.core.$ZodCheckEndsWithDef => f.format === 'ends_with')?.suffix;
+  const include = formats.find((f): f is z.core.$ZodCheckIncludesDef => f.format === 'includes')?.includes;
 
   // Check for well-known format types (only if no content constraints)
   const wellKnownFormat = formats.find(
@@ -21,7 +22,7 @@ export const generateString = (ctx: GenContext): string => {
   );
 
   if (wellKnownFormat && !prefix && !suffix && !include) {
-    const format = wellKnownFormat.format as string;
+    const { format } = wellKnownFormat;
     switch (format) {
       case 'email':
         return faker.internet.email();
@@ -67,9 +68,9 @@ export const generateString = (ctx: GenContext): string => {
   const suf = suffix ?? '';
   const mid = include ?? '';
 
-  const fixedLen = lengthEqualsCheck ? (lengthEqualsCheck.length as number) : undefined;
-  const minLen = minCheck ? (minCheck.minimum as number) : 0;
-  const maxLen = maxCheck ? (maxCheck.maximum as number) : 20;
+  const fixedLen = lengthEqualsCheck ? lengthEqualsCheck.length : undefined;
+  const minLen = minCheck ? minCheck.minimum : 0;
+  const maxLen = maxCheck ? maxCheck.maximum : 20;
 
   const overhead = pre.length + suf.length + mid.length;
 

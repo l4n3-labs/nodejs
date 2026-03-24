@@ -9,8 +9,8 @@ export const generateDate = (ctx: GenContext): Date => {
   const gtCheck = checks.find('greater_than');
   const ltCheck = checks.find('less_than');
 
-  const from = gtCheck ? (gtCheck.value as Date) : DEFAULT_FROM;
-  const to = ltCheck ? (ltCheck.value as Date) : DEFAULT_TO;
+  const from = gtCheck ? new Date(Number(gtCheck.value)) : DEFAULT_FROM;
+  const to = ltCheck ? new Date(Number(ltCheck.value)) : DEFAULT_TO;
 
   return faker.date.between({ from, to });
 };

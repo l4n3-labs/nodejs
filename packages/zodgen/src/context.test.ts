@@ -2,15 +2,15 @@ import { faker } from '@faker-js/faker';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod/v4';
 import { createCheckSet, createContext } from './context.js';
-import type { GeneratorConfig, ZodCheckInternal } from './types.js';
+import type { GeneratorConfig } from './types.js';
 
 const defaultConfig = {
   seed: undefined,
   overrides: [],
 } satisfies GeneratorConfig;
 
-const getRawChecks = <S extends z.ZodType>(schema: S): ReadonlyArray<ZodCheckInternal> =>
-  (schema.def.checks ?? []).map((c): ZodCheckInternal => ({ _zod: { def: { ...c._zod.def } } }));
+const getRawChecks = <S extends z.ZodType>(schema: S): ReadonlyArray<z.core.$ZodCheck> =>
+  (schema.def.checks ?? []) as ReadonlyArray<z.core.$ZodCheck>;
 
 describe('createCheckSet', () => {
   describe('has()', () => {
@@ -90,9 +90,8 @@ describe('createCheckSet', () => {
     it('returns correct defs for each check', () => {
       const schema = z.string().min(2).max(8);
       const checks = createCheckSet(getRawChecks(schema));
-      const all = checks.all();
-      const minDef = all.find((d) => d.check === 'min_length');
-      const maxDef = all.find((d) => d.check === 'max_length');
+      const minDef = checks.find('min_length');
+      const maxDef = checks.find('max_length');
       expect(minDef?.minimum).toBe(2);
       expect(maxDef?.maximum).toBe(8);
     });

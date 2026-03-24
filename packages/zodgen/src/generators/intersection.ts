@@ -1,8 +1,10 @@
+import type { z } from 'zod/v4';
+import { schemaDef } from '../schema-def.js';
 import type { GenContext } from '../types.js';
 
 export const generateIntersection = (ctx: GenContext): unknown => {
-  const def = (ctx.schema as any)._zod.def;
-  const left = ctx.generate(def.left) as Record<string, unknown>;
-  const right = ctx.generate(def.right) as Record<string, unknown>;
+  const def = schemaDef<z.core.$ZodIntersectionDef>(ctx.schema);
+  const left = ctx.generate(def.left as z.ZodType) as Record<string, unknown>;
+  const right = ctx.generate(def.right as z.ZodType) as Record<string, unknown>;
   return { ...left, ...right };
 };

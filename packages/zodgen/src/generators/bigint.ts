@@ -1,19 +1,20 @@
-import type { GenContext, ZodCheckDef } from '../types.js';
+import type { z } from 'zod/v4';
+import type { GenContext } from '../types.js';
 
 const DEFAULT_MIN = -1_000_000;
 const DEFAULT_MAX = 1_000_000;
 
-const resolveBigIntMin = (gtCheck: ZodCheckDef | undefined): number => {
+const resolveBigIntMin = (gtCheck: z.core.$ZodCheckGreaterThanDef | undefined): number => {
   if (!gtCheck) return DEFAULT_MIN;
-  const val = Number(gtCheck.value as bigint);
-  const inclusive = gtCheck.inclusive as boolean;
+  const val = Number(gtCheck.value);
+  const inclusive = gtCheck.inclusive;
   return inclusive ? val : val + 1;
 };
 
-const resolveBigIntMax = (ltCheck: ZodCheckDef | undefined): number => {
+const resolveBigIntMax = (ltCheck: z.core.$ZodCheckLessThanDef | undefined): number => {
   if (!ltCheck) return DEFAULT_MAX;
-  const val = Number(ltCheck.value as bigint);
-  const inclusive = ltCheck.inclusive as boolean;
+  const val = Number(ltCheck.value);
+  const inclusive = ltCheck.inclusive;
   return inclusive ? val : val - 1;
 };
 

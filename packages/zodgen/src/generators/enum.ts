@@ -1,8 +1,9 @@
+import type { z } from 'zod/v4';
+import { schemaDef } from '../schema-def.js';
 import type { GenContext } from '../types.js';
 
 export const generateEnum = (ctx: GenContext): string => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const def = (ctx.schema as any)._zod.def as { entries: Record<string, string> };
-  const values = Object.values(def.entries);
+  const { entries } = schemaDef<z.core.$ZodEnumDef>(ctx.schema);
+  const values = Object.values(entries) as string[];
   return ctx.faker.helpers.arrayElement(values);
 };
