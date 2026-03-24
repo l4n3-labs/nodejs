@@ -1,0 +1,9 @@
+{
+  "name": "@l4n3/tsconfig",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./base.json": "./base.json",
+    "./library.json": "./library.json"
+  }
+}

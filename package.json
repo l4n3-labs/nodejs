@@ -13,6 +13,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",
+    "@l4n3/biome-config": "workspace:*",
     "@typescript/native-preview": "^7.0.0-dev",
     "lefthook": "^2.1.4",
     "turbo": "^2.8.20"
