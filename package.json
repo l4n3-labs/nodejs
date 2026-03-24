@@ -6,6 +6,9 @@
   "scripts": {
     "build": "turbo run build",
     "check": "turbo run check",
+    "test": "turbo run test",
+    "test:projects": "vitest run",
+    "test:projects:watch": "vitest --watch",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
@@ -16,6 +19,7 @@
     "@l4n3/biome-config": "workspace:*",
     "@typescript/native-preview": "^7.0.0-dev",
     "lefthook": "^2.1.4",
-    "turbo": "^2.8.20"
+    "turbo": "^2.8.20",
+    "vitest": "^3.2.1"
   }
 }
