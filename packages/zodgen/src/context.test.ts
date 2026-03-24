@@ -2,18 +2,15 @@ import { faker } from '@faker-js/faker';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod/v4';
 import { createCheckSet, createContext } from './context.js';
-import type { GeneratorConfig } from './types.js';
+import type { GeneratorConfig, ZodCheckInternal } from './types.js';
 
 const defaultConfig = {
   seed: undefined,
   overrides: [],
 } satisfies GeneratorConfig;
 
-// Helper to extract raw check objects from a schema
-const getRawChecks = (schema: z.ZodType): ReadonlyArray<unknown> => {
-  const def = (schema as any)._zod.def as { checks?: unknown[] };
-  return Array.isArray(def.checks) ? def.checks : [];
-};
+const getRawChecks = <S extends z.ZodType>(schema: S): ReadonlyArray<ZodCheckInternal> =>
+  (schema.def.checks ?? []).map((c): ZodCheckInternal => ({ _zod: { def: { ...c._zod.def } } }));
 
 describe('createCheckSet', () => {
   describe('has()', () => {

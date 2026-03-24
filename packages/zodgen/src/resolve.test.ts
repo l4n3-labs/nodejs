@@ -79,8 +79,10 @@ describe('resolve', () => {
   });
 
   it('throws for unknown def type', () => {
+    const fakeDef = { type: '__nonexistent_type__', checks: [] };
     const fakeSchema = {
-      _zod: { def: { type: '__nonexistent_type__', checks: [] } },
+      def: fakeDef,
+      _zod: { def: fakeDef },
     } as unknown as z.ZodType;
     expect(() => resolve(fakeSchema, makeConfig(), [], 0, faker)).toThrow(
       'No generator for type: __nonexistent_type__',
