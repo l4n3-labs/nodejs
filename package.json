@@ -1,0 +1,20 @@
+{
+  "name": "@l4n3/root",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.32.0",
+  "scripts": {
+    "build": "turbo run build",
+    "check": "turbo run check",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write .",
+    "prepare": "lefthook install"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.8",
+    "@typescript/native-preview": "^7.0.0-dev",
+    "lefthook": "^2.1.4",
+    "turbo": "^2.8.20"
+  }
+}
