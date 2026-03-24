@@ -27,14 +27,15 @@ const createRecursiveCtx = (
   generate: (s: z.ZodType, key?: string) => unknown,
   faker?: Faker,
   depth = 0,
-): GenContext => createContext(schema, testConfig, [], depth, faker ?? createTestFaker(), generate);
+): GenContext =>
+  createContext(schema, testConfig, [], depth, faker ?? createTestFaker(), generate as GenContext['generate']);
 
 // A simple dispatcher for tests that need recursive generation
-const makeDispatch = (faker: Faker): ((schema: z.ZodType) => unknown) => {
+const makeDispatch = (faker: Faker): GenContext['generate'] => {
   const dispatch = (schema: z.ZodType): unknown => {
     const def = (schema as any)._zod.def;
     const type: string = def.type;
-    const ctx = createContext(schema, testConfig, [], 0, faker, dispatch);
+    const ctx = createContext(schema, testConfig, [], 0, faker, dispatch as GenContext['generate']);
     switch (type) {
       case 'string':
         return faker.lorem.word();
@@ -72,7 +73,7 @@ const makeDispatch = (faker: Faker): ((schema: z.ZodType) => unknown) => {
         return null;
     }
   };
-  return dispatch;
+  return dispatch as GenContext['generate'];
 };
 
 describe('generateUnion', () => {

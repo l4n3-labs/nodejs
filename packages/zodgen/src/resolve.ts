@@ -20,15 +20,15 @@ export const resolve = (
   depth: number,
   faker: Faker,
 ): unknown => {
-  const generate = (childSchema: z.ZodType, childKey?: string): unknown =>
-    resolve(childSchema, config, childKey !== undefined ? [...path, childKey] : path, depth + 1, faker);
+  const generate = <T>(childSchema: z.ZodType<T>, childKey?: string): T =>
+    resolve(childSchema, config, childKey !== undefined ? [...path, childKey] : path, depth + 1, faker) as T;
 
   const ctx = createContext(schema, config, path, depth, faker, generate);
 
   const matchedOverride = config.overrides.find((o) => matchOverride(o.matcher, path, ctx));
   if (matchedOverride) return matchedOverride.generate(ctx);
 
-  const defType = (schema as any)._zod.def.type as string;
+  const defType = schema._zod.def.type;
   const generator = generators.get(defType);
   if (!generator) throw new Error(`No generator for type: ${defType}`);
   return generator(ctx);

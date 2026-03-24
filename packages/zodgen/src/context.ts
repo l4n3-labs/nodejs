@@ -20,7 +20,7 @@ export const createContext = <S extends z.ZodType>(
   path: ReadonlyArray<string>,
   depth: number,
   faker: Faker,
-  generate: (schema: z.ZodType, key?: string) => unknown,
+  generate: <T>(schema: z.ZodType<T>, key?: string) => T,
 ): GenContext => ({
   schema,
   path,

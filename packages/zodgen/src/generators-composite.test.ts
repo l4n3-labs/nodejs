@@ -24,7 +24,8 @@ const createRecursiveCtx = (
   schema: z.ZodType,
   generate: (s: z.ZodType, key?: string) => unknown,
   faker?: Faker,
-): GenContext => createContext(schema, testConfig, [], 0, faker ?? createTestFaker(), generate);
+): GenContext =>
+  createContext(schema, testConfig, [], 0, faker ?? createTestFaker(), generate as GenContext['generate']);
 
 // A simple recursive generate function that handles primitives
 const makeSimpleGenerate =
