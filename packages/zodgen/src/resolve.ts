@@ -16,7 +16,7 @@ export const resolve = <T>(
   depth: number,
   faker: Faker,
 ): T => {
-  const generate = (childSchema: z.ZodType<T>, childKey?: string): T =>
+  const generate = <U>(childSchema: z.ZodType<U>, childKey?: string): U =>
     resolve(childSchema, config, childKey !== undefined ? [...path, childKey] : path, depth + 1, faker);
 
   const ctx = createContext(schema, config, path, depth, faker, generate);

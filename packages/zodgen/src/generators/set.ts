@@ -26,7 +26,7 @@ export const generateSet = <T>(ctx: GenContext<T>): Set<unknown> => {
     if (retries >= maxRetries) {
       throw new Error(`generateSet: could not generate ${count} unique values after ${maxRetries} retries`);
     }
-    const value = ctx.generate(valueType as z.ZodType<T>);
+    const value = ctx.generate(valueType as z.ZodType);
     if (!values.includes(value)) {
       values.push(value);
     } else {

@@ -291,7 +291,7 @@ describe('generateRecord', () => {
     const schema = z.record(z.string(), z.number());
     const faker = createTestFaker(1);
     const ctx = createRecursiveCtx(schema, makeSimpleGenerate(faker), faker);
-    const result = generateRecord(ctx);
+    const result = generateRecord(ctx) as Record<string, unknown>;
     for (const [k, v] of Object.entries(result)) {
       expect(typeof k).toBe('string');
       expect(typeof v).toBe('number');
@@ -302,7 +302,7 @@ describe('generateRecord', () => {
     const schema = z.record(z.string(), z.boolean());
     const faker = createTestFaker(1);
     const ctx = createRecursiveCtx(schema, makeSimpleGenerate(faker), faker);
-    const result = generateRecord(ctx);
+    const result = generateRecord(ctx) as Record<string, unknown>;
     const entryCount = Object.keys(result).length;
     expect(entryCount).toBeGreaterThanOrEqual(1);
     expect(entryCount).toBeLessThanOrEqual(3);

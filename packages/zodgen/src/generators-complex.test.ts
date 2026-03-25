@@ -24,7 +24,7 @@ const testConfig: GeneratorConfig = { seed: undefined, overrides: [] };
 
 const createRecursiveCtx = <T>(
   schema: z.ZodType<T>,
-  generate: (s: z.ZodType<T>, key?: string) => T,
+  generate: <U>(s: z.ZodType<U>, key?: string) => U,
   faker?: Faker,
   depth = 0,
 ): GenContext<T> => createContext(schema, testConfig, [], depth, faker ?? createTestFaker(), generate);

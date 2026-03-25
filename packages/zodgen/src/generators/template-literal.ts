@@ -11,7 +11,7 @@ export const generateTemplateLiteral = <T = string>(ctx: GenContext<T>): string 
         return part;
       }
       // Part is a schema — generate a value and coerce to string
-      return String(ctx.generate(part as z.ZodType<T>));
+      return String(ctx.generate(part as z.ZodType));
     })
     .join('');
 };

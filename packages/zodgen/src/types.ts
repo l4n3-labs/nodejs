@@ -59,7 +59,7 @@ export type GenContext<T> = {
   readonly faker: Faker;
   readonly config: GeneratorConfig;
   readonly checks: CheckSet;
-  readonly generate: (schema: z.ZodType<T>, key?: string) => T;
+  readonly generate: <U>(schema: z.ZodType<U>, key?: string) => U;
 };
 
 // --- Generator ---

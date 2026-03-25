@@ -16,8 +16,7 @@ export const generateMap = <T>(ctx: GenContext<T>): Map<unknown, unknown> => {
 
   const entries = Array.from(
     { length: count },
-    () =>
-      [ctx.generate(def.keyType as z.ZodType<T>), ctx.generate(def.valueType as z.ZodType<T>)] as [unknown, unknown],
+    () => [ctx.generate(def.keyType as z.ZodType), ctx.generate(def.valueType as z.ZodType)] as [unknown, unknown],
   );
 
   return new Map(entries);

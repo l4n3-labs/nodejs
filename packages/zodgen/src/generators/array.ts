@@ -14,5 +14,5 @@ export const generateArray = <T>(ctx: GenContext<T>): unknown[] => {
   const max = maxCheck ? maxCheck.maximum : Math.max(3, min);
   const count = lengthCheck ? lengthCheck.length : faker.number.int({ min, max });
 
-  return Array.from({ length: count }, () => ctx.generate(element as z.ZodType<T>));
+  return Array.from({ length: count }, () => ctx.generate(element as z.ZodType));
 };
