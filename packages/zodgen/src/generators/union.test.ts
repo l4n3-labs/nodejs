@@ -14,12 +14,13 @@ const createTestFaker = (seed?: number): Faker => {
 
 const testConfig: GeneratorConfig = { seed: undefined, overrides: [] };
 
-const createRecursiveCtx = <T>(
-  schema: z.ZodType<T>,
+const createRecursiveCtx = (
+  schema: z.ZodType,
   generate: <U>(s: z.ZodType<U>, key?: string) => U,
   faker?: Faker,
   depth = 0,
-): GenContext<T> => createContext(schema, testConfig, [], depth, faker ?? createTestFaker(), generate);
+): GenContext<unknown, 'union'> =>
+  createContext<unknown, 'union'>(schema, testConfig, [], depth, faker ?? createTestFaker(), generate);
 
 const makeDispatch = (faker: Faker): any => {
   const dispatch = (schema: z.ZodType): unknown => {

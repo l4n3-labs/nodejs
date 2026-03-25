@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { z } from 'zod/v4';
 import { createContext } from '../context.js';
 import { schemaDef } from '../schema-def.js';
-import type { GenContext, GeneratorConfig } from '../types.js';
+import type { GenContext, GeneratorConfig, ZodDefType } from '../types.js';
 import { generateLazy, generatePipe, generatePromise } from './recursive.js';
 
 const createTestFaker = (seed?: number): Faker => {
@@ -14,12 +14,13 @@ const createTestFaker = (seed?: number): Faker => {
 
 const testConfig: GeneratorConfig = { seed: undefined, overrides: [] };
 
-const createRecursiveCtx = <T>(
-  schema: z.ZodType<T>,
+const createRecursiveCtx = <D extends ZodDefType>(
+  schema: z.ZodType,
   generate: <U>(s: z.ZodType<U>, key?: string) => U,
   faker?: Faker,
   depth = 0,
-): GenContext<T> => createContext(schema, testConfig, [], depth, faker ?? createTestFaker(), generate);
+): GenContext<unknown, D> =>
+  createContext<unknown, D>(schema, testConfig, [], depth, faker ?? createTestFaker(), generate);
 
 const makeDispatch = (faker: Faker): any => {
   const dispatch = (schema: z.ZodType): unknown => {
@@ -53,7 +54,7 @@ describe('generateLazy', () => {
     const schema = z.lazy(() => z.literal('lazy-value'));
     const faker = createTestFaker(9);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker);
+    const ctx = createRecursiveCtx<'lazy'>(schema, dispatch, faker);
     const result = generateLazy(ctx);
     expect(result).toBe('lazy-value');
   });
@@ -62,7 +63,7 @@ describe('generateLazy', () => {
     const schema = z.lazy(() => z.literal('deep'));
     const faker = createTestFaker(10);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker, 3);
+    const ctx = createRecursiveCtx<'lazy'>(schema, dispatch, faker, 3);
     const result = generateLazy(ctx);
     expect(result).toBeUndefined();
   });
@@ -71,7 +72,7 @@ describe('generateLazy', () => {
     const schema = z.lazy(() => z.literal('still-ok'));
     const faker = createTestFaker(11);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker, 2);
+    const ctx = createRecursiveCtx<'lazy'>(schema, dispatch, faker, 2);
     const result = generateLazy(ctx);
     expect(result).toBe('still-ok');
   });
@@ -80,7 +81,7 @@ describe('generateLazy', () => {
     const schema = z.lazy(() => z.literal('deep'));
     const faker = createTestFaker(12);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker, 4);
+    const ctx = createRecursiveCtx<'lazy'>(schema, dispatch, faker, 4);
     const result = generateLazy(ctx);
     expect(result).toBeUndefined();
   });
@@ -91,7 +92,7 @@ describe('generatePromise', () => {
     const schema = z.promise(z.literal('promised'));
     const faker = createTestFaker(12);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker);
+    const ctx = createRecursiveCtx<'promise'>(schema, dispatch, faker);
     const result = generatePromise(ctx);
     expect(result).toBeInstanceOf(Promise);
     expect(await result).toBe('promised');
@@ -101,7 +102,7 @@ describe('generatePromise', () => {
     const schema = z.promise(z.number());
     const faker = createTestFaker(13);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker);
+    const ctx = createRecursiveCtx<'promise'>(schema, dispatch, faker);
     const result = await generatePromise(ctx);
     expect(typeof result).toBe('number');
   });
@@ -110,7 +111,7 @@ describe('generatePromise', () => {
     const schema = z.promise(z.string());
     const faker = createTestFaker(14);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker);
+    const ctx = createRecursiveCtx<'promise'>(schema, dispatch, faker);
     const result = await generatePromise(ctx);
     expect(typeof result).toBe('string');
   });
@@ -121,7 +122,7 @@ describe('generatePipe', () => {
     const schema = z.string().pipe(z.string().min(1));
     const faker = createTestFaker(14);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker);
+    const ctx = createRecursiveCtx<'pipe'>(schema, dispatch, faker);
     const result = generatePipe(ctx);
     expect(typeof result).toBe('string');
   });
@@ -130,7 +131,7 @@ describe('generatePipe', () => {
     const schema = z.string().transform((s) => s.length);
     const faker = createTestFaker(15);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker);
+    const ctx = createRecursiveCtx<'pipe'>(schema, dispatch, faker);
     // def.type === 'pipe', def.in is z.string()
     const def = schemaDef(schema);
     expect(def.type).toBe('pipe');

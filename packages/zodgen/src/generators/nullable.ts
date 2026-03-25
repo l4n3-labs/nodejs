@@ -1,22 +1,19 @@
 import type { z } from 'zod/v4';
-import { schemaDef } from '../schema-def.js';
 import type { GenContext } from '../types.js';
 
-export const generateNullable = <T>(ctx: GenContext<T | null>): unknown => {
-  const { innerType } = schemaDef<z.core.$ZodNullableDef>(ctx.schema);
+export const generateNullable = <T>(ctx: GenContext<T | null, 'nullable'>): unknown => {
+  const { innerType } = ctx.def;
   return ctx.faker.number.float() < 0.8 ? ctx.generate(innerType as z.ZodType) : null;
 };
 
-export const generateOptional = <T>(ctx: GenContext<T | undefined>): unknown => {
-  const { innerType } = schemaDef<z.core.$ZodOptionalDef>(ctx.schema);
+export const generateOptional = <T>(ctx: GenContext<T | undefined, 'optional'>): unknown => {
+  const { innerType } = ctx.def;
   return ctx.faker.number.float() < 0.8 ? ctx.generate(innerType as z.ZodType) : undefined;
 };
 
-export const generateDefault = <T>(ctx: GenContext<T>): unknown =>
-  schemaDef<z.core.$ZodDefaultDef>(ctx.schema).defaultValue;
+export const generateDefault = <T>(ctx: GenContext<T, 'default'>): unknown => ctx.def.defaultValue;
 
-export const generateReadonly = <T>(ctx: GenContext<T>): unknown =>
-  Object.freeze(ctx.generate(schemaDef<z.core.$ZodReadonlyDef>(ctx.schema).innerType as z.ZodType));
+export const generateReadonly = <T>(ctx: GenContext<T, 'readonly'>): unknown =>
+  Object.freeze(ctx.generate(ctx.def.innerType as z.ZodType));
 
-export const generateCatch = <T>(ctx: GenContext<T>): unknown =>
-  ctx.generate(schemaDef<z.core.$ZodCatchDef>(ctx.schema).innerType as z.ZodType);
+export const generateCatch = <T>(ctx: GenContext<T, 'catch'>): unknown => ctx.generate(ctx.def.innerType as z.ZodType);

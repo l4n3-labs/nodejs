@@ -18,7 +18,7 @@ const resolveMax = (ltCheck: z.core.$ZodCheckLessThanDef | undefined, isInt: boo
   return inclusive ? val : val - (isInt ? 1 : Number.EPSILON);
 };
 
-export const generateNumber = <T = number>(ctx: GenContext<T>): number => {
+export const generateNumber = <T = number>(ctx: GenContext<T, 'number'>): number => {
   const { faker, checks } = ctx;
 
   const gtCheck = checks.find('greater_than');

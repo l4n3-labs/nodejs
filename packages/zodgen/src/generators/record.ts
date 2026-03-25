@@ -1,10 +1,8 @@
 import type { z } from 'zod/v4';
-import { schemaDef } from '../schema-def.js';
 import type { GenContext } from '../types.js';
 
-export const generateRecord = <T>(ctx: GenContext<T>): T => {
-  const def = schemaDef<z.core.$ZodRecordDef>(ctx.schema);
-  const { faker } = ctx;
+export const generateRecord = <T>(ctx: GenContext<T, 'record'>): T => {
+  const { def, faker } = ctx;
 
   const count = faker.number.int({ min: 1, max: 3 });
 

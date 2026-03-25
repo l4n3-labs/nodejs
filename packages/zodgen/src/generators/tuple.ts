@@ -1,9 +1,8 @@
 import type { z } from 'zod/v4';
-import { schemaDef } from '../schema-def.js';
 import type { GenContext } from '../types.js';
 
-export const generateTuple = <T>(ctx: GenContext<T>): unknown[] => {
-  const def = schemaDef<z.core.$ZodTupleDef>(ctx.schema);
+export const generateTuple = <T>(ctx: GenContext<T, 'tuple'>): unknown[] => {
+  const { def } = ctx;
   const items = def.items.map((schema) => ctx.generate(schema as z.ZodType));
 
   if (def.rest === null) {

@@ -52,8 +52,9 @@ export type CheckSet = {
 
 // --- Generation Context ---
 
-export type GenContext<T> = {
+export type GenContext<T, D extends ZodDefType = ZodDefType> = {
   readonly schema: z.ZodType<T>;
+  readonly def: ResolvedDef<D>;
   readonly path: ReadonlyArray<string>;
   readonly depth: number;
   readonly faker: Faker;
@@ -62,11 +63,52 @@ export type GenContext<T> = {
   readonly generate: <U>(schema: z.ZodType<U>, key?: string) => U;
 };
 
-// --- Generator ---
+// --- Def type map ---
+// Maps each ZodDefType string literal to its corresponding Zod def interface.
 
 export type ZodDefType = z.core.$ZodTypeDef['type'];
 
-export type Generator = <T>(ctx: GenContext<T>) => T;
+export type ZodDefMap = {
+  readonly string: z.core.$ZodStringDef;
+  readonly number: z.core.$ZodNumberDef;
+  readonly boolean: z.core.$ZodBooleanDef;
+  readonly bigint: z.core.$ZodBigIntDef;
+  readonly symbol: z.core.$ZodSymbolDef;
+  readonly date: z.core.$ZodDateDef;
+  readonly object: z.core.$ZodObjectDef;
+  readonly array: z.core.$ZodArrayDef;
+  readonly tuple: z.core.$ZodTupleDef;
+  readonly set: z.core.$ZodSetDef;
+  readonly map: z.core.$ZodMapDef;
+  readonly record: z.core.$ZodRecordDef;
+  readonly literal: z.core.$ZodLiteralDef<z.core.util.Literal>;
+  readonly enum: z.core.$ZodEnumDef;
+  readonly union: z.core.$ZodUnionDef;
+  readonly intersection: z.core.$ZodIntersectionDef;
+  readonly nullable: z.core.$ZodNullableDef;
+  readonly optional: z.core.$ZodOptionalDef;
+  readonly default: z.core.$ZodDefaultDef;
+  readonly readonly: z.core.$ZodReadonlyDef;
+  readonly catch: z.core.$ZodCatchDef;
+  readonly lazy: z.core.$ZodLazyDef;
+  readonly promise: z.core.$ZodPromiseDef;
+  readonly pipe: z.core.$ZodPipeDef;
+  readonly null: z.core.$ZodNullDef;
+  readonly undefined: z.core.$ZodUndefinedDef;
+  readonly void: z.core.$ZodVoidDef;
+  readonly never: z.core.$ZodNeverDef;
+  readonly unknown: z.core.$ZodUnknownDef;
+  readonly any: z.core.$ZodAnyDef;
+  readonly nan: z.core.$ZodNaNDef;
+  readonly custom: z.core.$ZodCustomDef;
+  readonly template_literal: z.core.$ZodTemplateLiteralDef;
+};
+
+export type ResolvedDef<D extends ZodDefType> = D extends keyof ZodDefMap ? ZodDefMap[D] : z.core.$ZodTypeDef;
+
+// --- Generator ---
+
+export type Generator<D extends ZodDefType = ZodDefType> = <T>(ctx: GenContext<T, D>) => T;
 
 // --- Public API ---
 

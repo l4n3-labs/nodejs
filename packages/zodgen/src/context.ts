@@ -1,6 +1,6 @@
 import type { Faker } from '@faker-js/faker';
 import type { z } from 'zod/v4';
-import type { CheckSet, GenContext, GeneratorConfig } from './types.js';
+import type { CheckSet, GenContext, GeneratorConfig, ResolvedDef, ZodDefType } from './types.js';
 
 const checkSetCache = new WeakMap<z.ZodType, CheckSet>();
 
@@ -32,15 +32,17 @@ const getCheckSet = (schema: z.ZodType): CheckSet => {
   return checkSet;
 };
 
-export const createContext = <T>(
+export const createContext = <T, D extends ZodDefType = ZodDefType>(
   schema: z.ZodType<T>,
   config: GeneratorConfig,
   path: ReadonlyArray<string>,
   depth: number,
   faker: Faker,
   generate: <U>(schema: z.ZodType<U>, key?: string) => U,
-): GenContext<T> => ({
+): GenContext<T, D> => ({
   schema,
+  // biome-ignore lint/suspicious/noExplicitAny: accessing Zod v4 internals requires bypassing the public type surface
+  def: (schema as any)._zod.def as ResolvedDef<D>,
   path,
   depth,
   faker,

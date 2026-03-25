@@ -1,9 +1,7 @@
 import type { z } from 'zod/v4';
-import { schemaDef } from '../schema-def.js';
 import type { GenContext } from '../types.js';
 
-export const generateArray = <T>(ctx: GenContext<T>): unknown[] => {
-  const { element } = schemaDef<z.core.$ZodArrayDef>(ctx.schema);
+export const generateArray = <T>(ctx: GenContext<T, 'array'>): unknown[] => {
   const { checks, faker } = ctx;
 
   const minCheck = checks.find('min_length');
@@ -14,5 +12,5 @@ export const generateArray = <T>(ctx: GenContext<T>): unknown[] => {
   const max = maxCheck ? maxCheck.maximum : Math.max(3, min);
   const count = lengthCheck ? lengthCheck.length : faker.number.int({ min, max });
 
-  return Array.from({ length: count }, () => ctx.generate(element as z.ZodType));
+  return Array.from({ length: count }, () => ctx.generate(ctx.def.element as z.ZodType));
 };

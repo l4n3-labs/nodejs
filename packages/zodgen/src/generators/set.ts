@@ -1,9 +1,7 @@
 import type { z } from 'zod/v4';
-import { schemaDef } from '../schema-def.js';
 import type { GenContext } from '../types.js';
 
-export const generateSet = <T>(ctx: GenContext<T>): Set<unknown> => {
-  const { valueType } = schemaDef<z.core.$ZodSetDef>(ctx.schema);
+export const generateSet = <T>(ctx: GenContext<T, 'set'>): Set<unknown> => {
   const { checks, faker } = ctx;
 
   const minCheck = checks.find('min_size') ?? checks.find('min_length');
@@ -26,7 +24,7 @@ export const generateSet = <T>(ctx: GenContext<T>): Set<unknown> => {
     if (retries >= maxRetries) {
       throw new Error(`generateSet: could not generate ${count} unique values after ${maxRetries} retries`);
     }
-    const value = ctx.generate(valueType as z.ZodType);
+    const value = ctx.generate(ctx.def.valueType as z.ZodType);
     if (!values.includes(value)) {
       values.push(value);
     } else {

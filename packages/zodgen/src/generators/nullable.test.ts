@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { z } from 'zod/v4';
 import { createContext } from '../context.js';
 import { schemaDef } from '../schema-def.js';
-import type { GenContext, GeneratorConfig } from '../types.js';
+import type { GenContext, GeneratorConfig, ZodDefType } from '../types.js';
 import { generateCatch, generateDefault, generateNullable, generateOptional, generateReadonly } from './nullable.js';
 
 const createTestFaker = (seed?: number): Faker => {
@@ -14,12 +14,13 @@ const createTestFaker = (seed?: number): Faker => {
 
 const testConfig: GeneratorConfig = { seed: undefined, overrides: [] };
 
-const createRecursiveCtx = <T>(
-  schema: z.ZodType<T>,
+const createRecursiveCtx = <D extends ZodDefType>(
+  schema: z.ZodType,
   generate: <U>(s: z.ZodType<U>, key?: string) => U,
   faker?: Faker,
   depth = 0,
-): GenContext<T> => createContext(schema, testConfig, [], depth, faker ?? createTestFaker(), generate);
+): GenContext<unknown, D> =>
+  createContext<unknown, D>(schema, testConfig, [], depth, faker ?? createTestFaker(), generate);
 
 const makeDispatch = (faker: Faker): any => {
   const dispatch = (schema: z.ZodType): unknown => {
@@ -67,7 +68,7 @@ describe('generateNullable', () => {
     const faker = createTestFaker();
     const dispatch = makeDispatch(faker);
     const results = Array.from({ length: 100 }, () => {
-      const ctx = createRecursiveCtx(schema, dispatch, faker);
+      const ctx = createRecursiveCtx<'nullable'>(schema, dispatch, faker);
       return generateNullable(ctx);
     });
     expect(results).toContain('hello');
@@ -79,7 +80,7 @@ describe('generateNullable', () => {
     const faker = createTestFaker();
     const dispatch = makeDispatch(faker);
     const results = Array.from({ length: 200 }, () => {
-      const ctx = createRecursiveCtx(schema, dispatch, faker);
+      const ctx = createRecursiveCtx<'nullable'>(schema, dispatch, faker);
       return generateNullable(ctx);
     });
     const nonNullCount = results.filter((r) => r !== null).length;
@@ -95,7 +96,7 @@ describe('generateOptional', () => {
     const faker = createTestFaker();
     const dispatch = makeDispatch(faker);
     const results = Array.from({ length: 100 }, () => {
-      const ctx = createRecursiveCtx(schema, dispatch, faker);
+      const ctx = createRecursiveCtx<'optional'>(schema, dispatch, faker);
       return generateOptional(ctx);
     });
     expect(results).toContain('hello');
@@ -107,7 +108,7 @@ describe('generateOptional', () => {
     const faker = createTestFaker();
     const dispatch = makeDispatch(faker);
     const results = Array.from({ length: 200 }, () => {
-      const ctx = createRecursiveCtx(schema, dispatch, faker);
+      const ctx = createRecursiveCtx<'optional'>(schema, dispatch, faker);
       return generateOptional(ctx);
     });
     const nonUndefinedCount = results.filter((r) => r !== undefined).length;
@@ -122,7 +123,7 @@ describe('generateDefault', () => {
     const faker = createTestFaker(5);
     const dispatch = makeDispatch(faker);
     const results = Array.from({ length: 20 }, () => {
-      const ctx = createRecursiveCtx(schema, dispatch, faker);
+      const ctx = createRecursiveCtx<'default'>(schema, dispatch, faker);
       return generateDefault(ctx);
     });
     for (const r of results) {
@@ -134,7 +135,7 @@ describe('generateDefault', () => {
     const schema = z.number().default(0);
     const faker = createTestFaker(5);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker);
+    const ctx = createRecursiveCtx<'default'>(schema, dispatch, faker);
     const result = generateDefault(ctx);
     expect(typeof result).toBe('number');
   });
@@ -145,7 +146,7 @@ describe('generateReadonly', () => {
     const schema = z.object({ x: z.literal(1) }).readonly();
     const faker = createTestFaker(6);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker);
+    const ctx = createRecursiveCtx<'readonly'>(schema, dispatch, faker);
     const result = generateReadonly(ctx);
     expect(Object.isFrozen(result)).toBe(true);
   });
@@ -154,7 +155,7 @@ describe('generateReadonly', () => {
     const schema = z.object({ x: z.literal(42) }).readonly();
     const faker = createTestFaker(7);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker);
+    const ctx = createRecursiveCtx<'readonly'>(schema, dispatch, faker);
     const result = generateReadonly(ctx) as Record<string, unknown>;
     expect(result.x).toBe(42);
   });
@@ -163,7 +164,7 @@ describe('generateReadonly', () => {
     const schema = z.array(z.number()).readonly();
     const faker = createTestFaker(8);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker);
+    const ctx = createRecursiveCtx<'readonly'>(schema, dispatch, faker);
     const result = generateReadonly(ctx);
     expect(Object.isFrozen(result)).toBe(true);
     expect(Array.isArray(result)).toBe(true);
@@ -176,7 +177,7 @@ describe('generateCatch', () => {
     const faker = createTestFaker(8);
     const dispatch = makeDispatch(faker);
     const results = Array.from({ length: 20 }, () => {
-      const ctx = createRecursiveCtx(schema, dispatch, faker);
+      const ctx = createRecursiveCtx<'catch'>(schema, dispatch, faker);
       return generateCatch(ctx);
     });
     for (const r of results) {
@@ -188,7 +189,7 @@ describe('generateCatch', () => {
     const schema = z.number().catch(0);
     const faker = createTestFaker(9);
     const dispatch = makeDispatch(faker);
-    const ctx = createRecursiveCtx(schema, dispatch, faker);
+    const ctx = createRecursiveCtx<'catch'>(schema, dispatch, faker);
     const result = generateCatch(ctx);
     expect(typeof result).toBe('number');
   });

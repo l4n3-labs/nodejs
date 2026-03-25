@@ -17,8 +17,8 @@ const stubGenerate = () => {
   throw new Error('not implemented');
 };
 
-const createTestCtx = <T>(schema: z.ZodType<T>, faker?: Faker): GenContext<T> =>
-  createContext(schema, testConfig, [], 0, faker ?? createTestFaker(), stubGenerate);
+const createTestCtx = (schema: z.ZodType, faker?: Faker): GenContext<unknown, 'date'> =>
+  createContext<unknown, 'date'>(schema, testConfig, [], 0, faker ?? createTestFaker(), stubGenerate);
 
 describe('generateDate', () => {
   it('returns a Date instance', () => {

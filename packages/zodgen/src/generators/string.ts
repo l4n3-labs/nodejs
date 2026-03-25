@@ -1,19 +1,18 @@
 import type { z } from 'zod/v4';
-import { schemaDef } from '../schema-def.js';
 import type { GenContext } from '../types.js';
 
 // In Zod v4, startsWith/endsWith/includes are all string_format checks.
 // Shorthand schemas like z.email() put format directly on the def instead of in checks[].
-const findAllFormats = <T = string>(ctx: GenContext<T>): ReadonlyArray<z.core.$ZodCheckStringFormatDef> => {
+const findAllFormats = <T = string>(ctx: GenContext<T, 'string'>): ReadonlyArray<z.core.$ZodCheckStringFormatDef> => {
   const fromChecks = ctx.checks.all().filter((c): c is z.core.$ZodCheckStringFormatDef => c.check === 'string_format');
-  const def = schemaDef<z.core.$ZodTypeDef & { check?: string; format?: string }>(ctx.schema);
+  const def = ctx.def as z.core.$ZodStringDef & { check?: string; format?: string };
   if (def.check === 'string_format' && def.format) {
     return [...fromChecks, def as unknown as z.core.$ZodCheckStringFormatDef];
   }
   return fromChecks;
 };
 
-export const generateString = <T = string>(ctx: GenContext<T>): string => {
+export const generateString = <T = string>(ctx: GenContext<T, 'string'>): string => {
   const { faker, checks } = ctx;
 
   const formats = findAllFormats(ctx);
