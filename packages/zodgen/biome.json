@@ -1,5 +1,17 @@
 {
   "$schema": "https://biomejs.dev/schemas/2.4.8/schema.json",
   "root": false,
-  "extends": ["@l4n3/biome-config/biome"]
+  "extends": ["@l4n3/biome-config/biome"],
+  "overrides": [
+    {
+      "includes": ["**/*.test.ts", "**/*.spec.ts"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noExplicitAny": "off"
+          }
+        }
+      }
+    }
+  ]
 }

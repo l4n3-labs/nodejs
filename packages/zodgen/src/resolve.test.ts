@@ -33,9 +33,9 @@ describe('resolve', () => {
     });
     const result = resolve(schema, makeConfig(), [], 0, faker) as Record<string, unknown>;
     expect(typeof result).toBe('object');
-    expect(typeof result['name']).toBe('string');
-    expect(typeof result['age']).toBe('number');
-    expect(typeof result['active']).toBe('boolean');
+    expect(typeof result.name).toBe('string');
+    expect(typeof result.age).toBe('number');
+    expect(typeof result.active).toBe('boolean');
   });
 
   it('applies string override matching by path segment', () => {
@@ -47,7 +47,7 @@ describe('resolve', () => {
       },
     ]);
     const result = resolve(schema, config, [], 0, faker) as Record<string, unknown>;
-    expect(result['name']).toBe('overridden-name');
+    expect(result.name).toBe('overridden-name');
   });
 
   it('applies predicate override', () => {
@@ -59,7 +59,7 @@ describe('resolve', () => {
     ]);
     const schema = z.object({ email: z.string() });
     const result = resolve(schema, config, [], 0, faker) as Record<string, unknown>;
-    expect(result['email']).toBe('test@example.com');
+    expect(result.email).toBe('test@example.com');
   });
 
   it('first registered override wins when multiple match', () => {
@@ -75,7 +75,7 @@ describe('resolve', () => {
     ]);
     const schema = z.object({ name: z.string() });
     const result = resolve(schema, config, [], 0, faker) as Record<string, unknown>;
-    expect(result['name']).toBe('first');
+    expect(result.name).toBe('first');
   });
 
   it('throws for unknown def type', () => {
@@ -99,12 +99,12 @@ describe('resolve', () => {
       ),
     });
     const result = resolve(schema, makeConfig(), [], 0, faker) as Record<string, unknown>;
-    expect(Array.isArray(result['users'])).toBe(true);
-    const users = result['users'] as Array<Record<string, unknown>>;
+    expect(Array.isArray(result.users)).toBe(true);
+    const users = result.users as Array<Record<string, unknown>>;
     expect(users.length).toBeGreaterThanOrEqual(1);
     for (const user of users) {
-      expect(typeof user['id']).toBe('number');
-      expect(typeof user['username']).toBe('string');
+      expect(typeof user.id).toBe('number');
+      expect(typeof user.username).toBe('string');
     }
   });
 

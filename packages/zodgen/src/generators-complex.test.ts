@@ -29,13 +29,10 @@ const createRecursiveCtx = <T>(
   depth = 0,
 ): GenContext<T> => createContext(schema, testConfig, [], depth, faker ?? createTestFaker(), generate);
 
-// biome-ignore lint/suspicious/noExplicitAny: test dispatch handles all schema types dynamically
 const makeDispatch = (faker: Faker): any => {
   const dispatch = (schema: z.ZodType): unknown => {
-    // biome-ignore lint/suspicious/noExplicitAny: dynamic def access across all schema types
     const def = schema._zod.def as any;
     const type = def.type;
-    // biome-ignore lint/suspicious/noExplicitAny: loosely typed test context
     const ctx = createContext(schema, testConfig, [], 0, faker, dispatch as any);
     switch (type) {
       case 'string':
@@ -47,34 +44,24 @@ const makeDispatch = (faker: Faker): any => {
       case 'literal':
         return def.values[0];
       case 'union':
-        // biome-ignore lint/suspicious/noExplicitAny: test utility
         return generateUnion(ctx as any);
       case 'intersection':
-        // biome-ignore lint/suspicious/noExplicitAny: test utility
         return generateIntersection(ctx as any);
       case 'nullable':
-        // biome-ignore lint/suspicious/noExplicitAny: test utility
         return generateNullable(ctx as any);
       case 'optional':
-        // biome-ignore lint/suspicious/noExplicitAny: test utility
         return generateOptional(ctx as any);
       case 'default':
-        // biome-ignore lint/suspicious/noExplicitAny: test utility
         return generateDefault(ctx as any);
       case 'readonly':
-        // biome-ignore lint/suspicious/noExplicitAny: test utility
         return generateReadonly(ctx as any);
       case 'catch':
-        // biome-ignore lint/suspicious/noExplicitAny: test utility
         return generateCatch(ctx as any);
       case 'lazy':
-        // biome-ignore lint/suspicious/noExplicitAny: test utility
         return generateLazy(ctx as any);
       case 'promise':
-        // biome-ignore lint/suspicious/noExplicitAny: test utility
         return generatePromise(ctx as any);
       case 'pipe':
-        // biome-ignore lint/suspicious/noExplicitAny: test utility
         return generatePipe(ctx as any);
       case 'object': {
         const shape = def.shape as Record<string, z.ZodType>;

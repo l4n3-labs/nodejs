@@ -1,5 +1,5 @@
-import type { z } from "zod/v4";
-import type { GenContext } from "../types.js";
+import type { z } from 'zod/v4';
+import type { GenContext } from '../types.js';
 
 const DEFAULT_MIN = -1_000_000;
 const DEFAULT_MAX = 1_000_000;
@@ -21,13 +21,13 @@ const resolveMax = (ltCheck: z.core.$ZodCheckLessThanDef | undefined, isInt: boo
 export const generateNumber = <T = number>(ctx: GenContext<T>): number => {
   const { faker, checks } = ctx;
 
-  const gtCheck = checks.find("greater_than");
-  const ltCheck = checks.find("less_than");
-  const formatCheck = checks.find("number_format");
-  const multipleOfCheck = checks.find("multiple_of");
+  const gtCheck = checks.find('greater_than');
+  const ltCheck = checks.find('less_than');
+  const formatCheck = checks.find('number_format');
+  const multipleOfCheck = checks.find('multiple_of');
 
   const fmt = formatCheck ? formatCheck.format : undefined;
-  const isInt = fmt === "safeint" || fmt === "int32" || fmt === "uint32";
+  const isInt = fmt === 'safeint' || fmt === 'int32' || fmt === 'uint32';
   const min = resolveMin(gtCheck, isInt);
   const max = resolveMax(ltCheck, isInt);
 

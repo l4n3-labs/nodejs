@@ -86,8 +86,8 @@ describe('generateObject', () => {
     const faker = createTestFaker(42);
     const ctx = createRecursiveCtx(schema, makeSimpleGenerate(faker), faker);
     const result = generateObject(ctx);
-    expect(typeof result['label']).toBe('string');
-    expect(typeof result['count']).toBe('number');
+    expect(typeof result.label).toBe('string');
+    expect(typeof result.count).toBe('number');
   });
 });
 
