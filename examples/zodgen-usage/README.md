@@ -25,6 +25,7 @@ npx tsx examples/zodgen-usage/src/basic-primitives.ts
 | [`seeded-generation.ts`](src/seeded-generation.ts) | Deterministic output with `{ seed }` and `withSeed()` |
 | [`custom-overrides.ts`](src/custom-overrides.ts) | `fixture.create()`, `override()` with string and predicate matchers |
 | [`recursive-schemas.ts`](src/recursive-schemas.ts) | `z.lazy()` for trees, linked lists, and nested comment threads |
+| [`restaurant-menu.ts`](src/restaurant-menu.ts) | Domain example: defaults, overrides, uniqueness, and full schema composition |
 
 ## Key APIs
 
