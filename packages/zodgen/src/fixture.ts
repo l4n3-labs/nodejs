@@ -24,7 +24,7 @@ const createFaker = (seed: number | undefined): Faker =>
   seed !== undefined ? createSeededFaker(seed) : createUnseededFaker();
 
 const generateOne = <T>(schema: z.ZodType<T>, config: GeneratorConfig, faker: Faker): T =>
-  resolve(schema, config, [], 0, faker) as T;
+  resolve(schema, config, [], 0, faker);
 
 const getByDotPath = (obj: unknown, path: string): unknown =>
   path.split('.').reduce<unknown>((acc, key) => (acc as Record<string, unknown>)?.[key], obj);
