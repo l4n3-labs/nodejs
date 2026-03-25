@@ -7,6 +7,7 @@ import type { GeneratorConfig } from './types.js';
 const defaultConfig = {
   seed: undefined,
   overrides: [],
+  generators: {},
 } satisfies GeneratorConfig;
 
 const getRawChecks = <S extends z.ZodType>(schema: S): ReadonlyArray<z.core.$ZodCheck> =>

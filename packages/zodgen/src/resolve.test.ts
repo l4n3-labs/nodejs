@@ -7,6 +7,7 @@ import type { GenContext, GeneratorConfig } from './types.js';
 const makeConfig = (overrides: GeneratorConfig['overrides'] = []): GeneratorConfig => ({
   seed: undefined,
   overrides,
+  generators: {},
 });
 
 describe('resolve', () => {

@@ -2,7 +2,7 @@ import type { Faker } from '@faker-js/faker';
 import type { z } from 'zod/v4';
 import { createContext } from './context.js';
 import { generators } from './generators/registry.js';
-import type { GenContext, GeneratorConfig, Override } from './types.js';
+import type { GenContext, Generator, GeneratorConfig, Override } from './types.js';
 
 type IndexedOverrides = {
   readonly byKey: ReadonlyMap<string, Override<unknown>>;
@@ -59,7 +59,8 @@ export const resolve = <T>(
   }
 
   const defType = schema._zod.def.type;
-  const generator = generators.get(defType);
+  // biome-ignore lint/suspicious/noExplicitAny: dynamic lookup produces an intersection type that can't be narrowed statically
+  const generator = (config.generators[defType] as Generator<any> | undefined) ?? generators.get(defType);
   if (!generator) throw new Error(`No generator for type: ${defType}`);
 
   // Defer context creation until the generator needs it (most common path)

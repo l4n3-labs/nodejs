@@ -2,7 +2,7 @@ import { base, en, Faker } from '@faker-js/faker';
 import type { z } from 'zod/v4';
 import { defaultConfig } from './config.js';
 import { resolve } from './resolve.js';
-import type { FixtureGenerator, FixtureOptions, GeneratorConfig, ManyOptions } from './types.js';
+import type { FixtureGenerator, FixtureOptions, Generator, GeneratorConfig, ManyOptions, ZodDefType } from './types.js';
 
 const fakerCache = new Map<number, Faker>();
 
@@ -95,13 +95,24 @@ const createGenerator = <T>(schema: z.ZodType<T>, config: GeneratorConfig): Fixt
         })),
       ],
     })) as FixtureGenerator<T>['partialOverride'],
+  generator: <D extends ZodDefType>(defType: D, gen: Generator<D>): FixtureGenerator<T> =>
+    createGenerator(schema, {
+      ...config,
+      generators: { ...config.generators, [defType]: gen },
+    }),
+});
+
+const configFromOptions = (opts?: FixtureOptions): GeneratorConfig => ({
+  ...defaultConfig,
+  seed: opts?.seed,
+  generators: { ...defaultConfig.generators, ...opts?.generators },
 });
 
 export const fixture = Object.assign(
   <T>(schema: z.ZodType<T>, opts?: FixtureOptions): FixtureGenerator<T> =>
-    createGenerator(schema, { ...defaultConfig, seed: opts?.seed }),
+    createGenerator(schema, configFromOptions(opts)),
   {
     create: <T>(schema: z.ZodType<T>, opts?: FixtureOptions): FixtureGenerator<T> =>
-      createGenerator(schema, { ...defaultConfig, seed: opts?.seed }),
+      createGenerator(schema, configFromOptions(opts)),
   },
 );

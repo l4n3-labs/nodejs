@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod/v4';
 import { fixture } from './fixture.js';
+import type { GenContext } from './types.js';
 
 describe('fixture()', () => {
   it('generates a value from a simple schema', () => {
@@ -468,5 +469,61 @@ describe('integration: nested schemas', () => {
     const schema = z.union([z.string(), z.number()]);
     const result = fixture(schema).one();
     expect(typeof result === 'string' || typeof result === 'number').toBe(true);
+  });
+});
+
+describe('config generators', () => {
+  const customStringGenerator = <T>(_ctx: GenContext<T, 'string'>): T => 'custom-string' as T;
+  const customNumberGenerator = <T>(_ctx: GenContext<T, 'number'>): T => 999 as T;
+
+  it('overrides the default generator for a type via .generator()', () => {
+    const result = fixture(z.string()).generator('string', customStringGenerator).one();
+    expect(result).toBe('custom-string');
+  });
+
+  it('overrides the default generator for a type via FixtureOptions', () => {
+    const result = fixture(z.string(), { generators: { string: customStringGenerator } }).one();
+    expect(result).toBe('custom-string');
+  });
+
+  it('applies to all fields of that type in an object', () => {
+    const schema = z.object({ name: z.string(), email: z.string() });
+    const result = fixture(schema).generator('string', customStringGenerator).one();
+    expect(result.name).toBe('custom-string');
+    expect(result.email).toBe('custom-string');
+  });
+
+  it('supports multiple config generators for different types', () => {
+    const schema = z.object({ name: z.string(), age: z.number() });
+    const result = fixture(schema)
+      .generator('string', customStringGenerator)
+      .generator('number', customNumberGenerator)
+      .one();
+    expect(result.name).toBe('custom-string');
+    expect(result.age).toBe(999);
+  });
+
+  it('path-based overrides take priority over config generators', () => {
+    const schema = z.object({ name: z.string(), title: z.string() });
+    const result = fixture(schema)
+      .generator('string', customStringGenerator)
+      .override('name', () => 'override-wins')
+      .one();
+    expect(result.name).toBe('override-wins');
+    expect(result.title).toBe('custom-string');
+  });
+
+  it('does not affect other types', () => {
+    const schema = z.object({ name: z.string(), age: z.number() });
+    const result = fixture(schema).generator('string', customStringGenerator).one();
+    expect(result.name).toBe('custom-string');
+    expect(typeof result.age).toBe('number');
+  });
+
+  it('is immutable — does not mutate the original generator', () => {
+    const gen = fixture(z.string());
+    gen.generator('string', customStringGenerator);
+    const result = gen.one();
+    expect(result).not.toBe('custom-string');
   });
 });

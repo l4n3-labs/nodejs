@@ -7,6 +7,7 @@ export type GeneratorConfig = {
   readonly seed: number | undefined;
   // biome-ignore lint/suspicious/noExplicitAny: overrides handle heterogeneous schema types at runtime
   readonly overrides: ReadonlyArray<Override<any>>;
+  readonly generators: Partial<Readonly<{ [D in ZodDefType]: Generator<D> }>>;
 };
 
 // --- Overrides ---
@@ -157,8 +158,10 @@ export type FixtureGenerator<T> = {
         overrides: PartialOverrideGenerators<NonNullable<T[K]>>,
       ) => FixtureGenerator<T>
     : never;
+  readonly generator: <D extends ZodDefType>(defType: D, gen: Generator<D>) => FixtureGenerator<T>;
 };
 
 export type FixtureOptions = {
   readonly seed?: number;
+  readonly generators?: GeneratorConfig['generators'];
 };
