@@ -109,6 +109,72 @@ describe('generateString', () => {
     expect(result.startsWith('pre_')).toBe(true);
     expect(result.endsWith('_suf')).toBe(true);
   });
+
+  it('returns an IPv4 address for ipv4 format', () => {
+    const result = generateString(createTestCtx(z.ipv4()));
+    expect(result).toMatch(/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/);
+  });
+
+  it('returns an IPv6 address for ipv6 format', () => {
+    const result = generateString(createTestCtx(z.ipv6()));
+    expect(result).toMatch(/:/);
+  });
+
+  it('returns a cuid for cuid format', () => {
+    const result = generateString(createTestCtx(z.cuid()));
+    expect(result.startsWith('c')).toBe(true);
+    expect(result.length).toBe(25);
+  });
+
+  it('returns a cuid2 for cuid2 format', () => {
+    const result = generateString(createTestCtx(z.cuid2()));
+    expect(result.length).toBe(24);
+    expect(result).toMatch(/^[a-z0-9]+$/);
+  });
+
+  it('returns a ulid for ulid format', () => {
+    const result = generateString(createTestCtx(z.ulid()));
+    expect(result.length).toBe(26);
+    expect(result).toMatch(/^[A-Z0-9]+$/);
+  });
+
+  it('returns a nanoid for nanoid format', () => {
+    const result = generateString(createTestCtx(z.nanoid()));
+    expect(result.length).toBe(21);
+  });
+
+  it('returns an emoji for emoji format', () => {
+    const result = generateString(createTestCtx(z.emoji()));
+    expect(typeof result).toBe('string');
+    expect(result.length).toBeGreaterThan(0);
+  });
+
+  it('returns a base64 string for base64 format', () => {
+    const result = generateString(createTestCtx(z.base64()));
+    expect(typeof result).toBe('string');
+    expect(result.length).toBe(12);
+  });
+
+  it('returns a base64url string for base64url format', () => {
+    const result = generateString(createTestCtx(z.base64url()));
+    expect(typeof result).toBe('string');
+    expect(result.length).toBe(12);
+  });
+
+  it('returns an ISO datetime for datetime format', () => {
+    const result = generateString(createTestCtx(z.iso.datetime()));
+    expect(result).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  });
+
+  it('returns a date string for date format', () => {
+    const result = generateString(createTestCtx(z.iso.date()));
+    expect(result).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+  });
+
+  it('returns a time string for time format', () => {
+    const result = generateString(createTestCtx(z.iso.time()));
+    expect(result).toMatch(/^\d{2}:\d{2}:\d{2}/);
+  });
 });
 
 // --- generateNumber ---
@@ -173,6 +239,26 @@ describe('generateNumber', () => {
       const result = generateNumber(createTestCtx(z.number().negative()));
       expect(result).toBeLessThan(0);
     }
+  });
+
+  it('respects exclusive min (gt)', () => {
+    for (let i = 0; i < 10; i++) {
+      const result = generateNumber(createTestCtx(z.number().gt(5)));
+      expect(result).toBeGreaterThan(5);
+    }
+  });
+
+  it('respects exclusive max (lt)', () => {
+    for (let i = 0; i < 10; i++) {
+      const result = generateNumber(createTestCtx(z.number().lt(10)));
+      expect(result).toBeLessThan(10);
+    }
+  });
+
+  it('avoids -0 for multipleOf result', () => {
+    const result = generateNumber(createTestCtx(z.number().int().multipleOf(5).min(0).max(0)));
+    expect(Object.is(result, -0)).toBe(false);
+    expect(result).toBe(0);
   });
 });
 
@@ -261,6 +347,20 @@ describe('generateBigInt', () => {
       const result = generateBigInt(createTestCtx(z.bigint().min(5n).max(10n)));
       expect(result).toBeGreaterThanOrEqual(5n);
       expect(result).toBeLessThanOrEqual(10n);
+    }
+  });
+
+  it('respects exclusive min (gt)', () => {
+    for (let i = 0; i < 5; i++) {
+      const result = generateBigInt(createTestCtx(z.bigint().gt(10n)));
+      expect(result).toBeGreaterThan(10n);
+    }
+  });
+
+  it('respects exclusive max (lt)', () => {
+    for (let i = 0; i < 5; i++) {
+      const result = generateBigInt(createTestCtx(z.bigint().lt(50n)));
+      expect(result).toBeLessThan(50n);
     }
   });
 });

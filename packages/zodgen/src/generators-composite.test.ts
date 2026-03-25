@@ -236,6 +236,14 @@ describe('generateSet', () => {
     expect(result.size).toBeLessThanOrEqual(2);
   });
 
+  it('respects size_equals constraint', () => {
+    const schema = z.set(z.number()).size(5);
+    const faker = createTestFaker(1);
+    const ctx = createRecursiveCtx(schema, makeSimpleGenerate(faker), faker);
+    const result = generateSet(ctx);
+    expect(result.size).toBe(5);
+  });
+
   it('throws when unable to generate enough unique values', () => {
     // A literal schema can only produce one unique value
     const schema = z.set(z.literal('x')).min(2);
@@ -273,6 +281,22 @@ describe('generateMap', () => {
     const result = generateMap(ctx);
     expect(result.size).toBeGreaterThanOrEqual(1);
     expect(result.size).toBeLessThanOrEqual(3);
+  });
+
+  it('respects min_size constraint', () => {
+    const schema = z.map(z.string(), z.number()).min(2);
+    const faker = createTestFaker(1);
+    const ctx = createRecursiveCtx(schema, makeSimpleGenerate(faker), faker);
+    const result = generateMap(ctx);
+    expect(result.size).toBeGreaterThanOrEqual(2);
+  });
+
+  it('respects max_size constraint', () => {
+    const schema = z.map(z.string(), z.number()).max(1);
+    const faker = createTestFaker(1);
+    const ctx = createRecursiveCtx(schema, makeSimpleGenerate(faker), faker);
+    const result = generateMap(ctx);
+    expect(result.size).toBeLessThanOrEqual(1);
   });
 });
 
