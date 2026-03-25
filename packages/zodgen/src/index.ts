@@ -5,6 +5,7 @@ export type {
   FixtureOptions,
   GenContext,
   GeneratorConfig,
+  ManyOptions,
   Override,
   ZodCheckDef,
 } from './types.js';

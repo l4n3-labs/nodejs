@@ -8,7 +8,13 @@ export default mergeConfig(
       coverage: {
         provider: 'v8',
         include: ['src/**/*.ts'],
-        exclude: ['src/**/*.test.ts', 'src/generators/registry.ts', 'src/index.ts', 'src/types.ts'],
+        exclude: [
+          'src/**/*.test.ts',
+          'src/**/*.bench.ts',
+          'src/generators/registry.ts',
+          'src/index.ts',
+          'src/types.ts',
+        ],
         thresholds: {
           lines: 80,
           functions: 80,

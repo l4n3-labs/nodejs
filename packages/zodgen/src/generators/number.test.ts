@@ -119,6 +119,22 @@ describe('generateNumber', () => {
     }
   });
 
+  it('respects exclusive min with int (gt + int)', () => {
+    for (let i = 0; i < 10; i++) {
+      const result = generateNumber(createTestCtx(z.number().int().gt(5)));
+      expect(Number.isInteger(result)).toBe(true);
+      expect(result).toBeGreaterThan(5);
+    }
+  });
+
+  it('respects exclusive max with int (lt + int)', () => {
+    for (let i = 0; i < 10; i++) {
+      const result = generateNumber(createTestCtx(z.number().int().lt(10)));
+      expect(Number.isInteger(result)).toBe(true);
+      expect(result).toBeLessThan(10);
+    }
+  });
+
   it('respects safeint format', () => {
     for (let i = 0; i < 10; i++) {
       const result = generateNumber(createTestCtx(z.number().safe()));

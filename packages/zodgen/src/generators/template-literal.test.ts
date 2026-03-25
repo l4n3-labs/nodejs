@@ -83,4 +83,13 @@ describe('generateTemplateLiteral', () => {
     const result = generateTemplateLiteral(ctx);
     expect(typeof result).toBe('string');
   });
+
+  it('handles raw string parts mixed with schema parts', () => {
+    const schema = z.templateLiteral(['hello-', z.number(), '-world']);
+    const faker = createTestFaker(1);
+    const generate = makeSimpleGenerate(faker);
+    const ctx = createRecursiveCtx(schema, generate, faker);
+    const result = generateTemplateLiteral(ctx);
+    expect(result).toMatch(/^hello-\d+-world$/);
+  });
 });

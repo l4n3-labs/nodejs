@@ -78,13 +78,41 @@ type PredicateOverride<T> = (
   generate: (ctx: GenContext<unknown>) => unknown,
 ) => FixtureGenerator<T>;
 
+type ObjectValueKeys<T> = {
+  [K in keyof T & string]: NonNullable<T[K]> extends Record<string, unknown> ? K : never;
+}[keyof T & string];
+
+type PartialOverrideGenerators<V> = {
+  readonly [P in keyof V]?: (ctx: GenContext<V[P]>) => V[P];
+};
+
+type DotPaths<T, Prefix extends string = ''> =
+  T extends Record<string, unknown>
+    ? {
+        [K in keyof T & string]:
+          | `${Prefix}${K}`
+          | (NonNullable<T[K]> extends Record<string, unknown> ? DotPaths<NonNullable<T[K]>, `${Prefix}${K}.`> : never);
+      }[keyof T & string]
+    : never;
+
+export type ManyOptions<T> = {
+  readonly unique?: ReadonlyArray<DotPaths<T>>;
+};
+
 export type FixtureGenerator<T> = {
   readonly one: () => T;
-  readonly many: (count: number) => ReadonlyArray<T>;
+  readonly many: (count: number, options?: ManyOptions<T>) => ReadonlyArray<T>;
   readonly seed: (seed: number) => FixtureGenerator<T>;
+  readonly for: <U>(schema: z.ZodType<U>) => FixtureGenerator<U>;
   readonly override: T extends Record<string, unknown>
     ? ObjectOverride<T> & PredicateOverride<T>
     : PredicateOverride<T>;
+  readonly partialOverride: T extends Record<string, unknown>
+    ? <K extends ObjectValueKeys<T>>(
+        key: K,
+        overrides: PartialOverrideGenerators<NonNullable<T[K]>>,
+      ) => FixtureGenerator<T>
+    : never;
 };
 
 export type FixtureOptions = {

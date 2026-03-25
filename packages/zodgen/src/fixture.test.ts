@@ -43,6 +43,55 @@ describe('.many()', () => {
     const unique = new Set(results);
     expect(unique.size).toBeGreaterThan(1);
   });
+
+  it('enforces unique values for top-level keys', () => {
+    const schema = z.object({ id: z.number().int().min(1).max(10000), name: z.string() });
+    const results = fixture(schema).many(10, { unique: ['id'] });
+    const ids = results.map((r) => r.id);
+    expect(new Set(ids).size).toBe(10);
+  });
+
+  it('enforces unique values for nested keys with dot syntax', () => {
+    const schema = z.object({
+      user: z.object({
+        email: z.email(),
+        name: z.string(),
+      }),
+    });
+    const results = fixture(schema).many(10, { unique: ['user.email'] });
+    const emails = results.map((r) => r.user.email);
+    expect(new Set(emails).size).toBe(10);
+  });
+
+  it('enforces uniqueness across multiple keys', () => {
+    const schema = z.object({ id: z.uuid(), email: z.email() });
+    const results = fixture(schema).many(10, { unique: ['id', 'email'] });
+    expect(new Set(results.map((r) => r.id)).size).toBe(10);
+    expect(new Set(results.map((r) => r.email)).size).toBe(10);
+  });
+
+  it('throws when uniqueness cannot be satisfied', () => {
+    const schema = z.object({ flag: z.boolean() });
+    expect(() => fixture(schema).many(5, { unique: ['flag'] })).toThrow(/unique/i);
+  });
+
+  it('works without unique option (unchanged behavior)', () => {
+    const results = fixture(z.string()).many(5);
+    expect(results).toHaveLength(5);
+  });
+
+  it('enforces unique values for deeply nested dot paths', () => {
+    const schema = z.object({
+      org: z.object({
+        location: z.object({
+          city: z.string(),
+        }),
+      }),
+    });
+    const results = fixture(schema).many(10, { unique: ['org.location.city'] });
+    const cities = results.map((r) => r.org.location.city);
+    expect(new Set(cities).size).toBe(10);
+  });
 });
 
 describe('.seed()', () => {
@@ -85,6 +134,151 @@ describe('.override()', () => {
   });
 });
 
+describe('.partialOverride()', () => {
+  const schema = z.object({
+    name: z.string(),
+    address: z.object({
+      street: z.string(),
+      city: z.string(),
+      zip: z.string().length(5),
+    }),
+  });
+
+  it('overrides specific nested keys while preserving others', () => {
+    const result = fixture(schema, { seed: 42 })
+      .partialOverride('address', { city: () => 'New York' })
+      .one();
+
+    expect(result.address.city).toBe('New York');
+    expect(typeof result.address.street).toBe('string');
+    expect(result.address.zip).toHaveLength(5);
+  });
+
+  it('overrides multiple nested keys', () => {
+    const result = fixture(schema)
+      .partialOverride('address', {
+        city: () => 'Boston',
+        zip: () => '02101',
+      })
+      .one();
+
+    expect(result.address.city).toBe('Boston');
+    expect(result.address.zip).toBe('02101');
+    expect(typeof result.address.street).toBe('string');
+  });
+
+  it('does not affect fields outside the target object', () => {
+    const gen = fixture(schema, { seed: 42 });
+    const withPartial = gen.partialOverride('address', { city: () => 'Denver' });
+
+    const a = gen.one();
+    const b = withPartial.one();
+
+    expect(a.name).toBe(b.name);
+    expect(b.address.city).toBe('Denver');
+  });
+
+  it('works with nullable nested objects', () => {
+    const s = z.object({
+      profile: z
+        .object({
+          bio: z.string(),
+          website: z.string().url(),
+        })
+        .nullable(),
+    });
+
+    const results = fixture(s, { seed: 1 })
+      .partialOverride('profile', { bio: () => 'Custom bio' })
+      .many(20);
+
+    const nonNull = results.filter((r) => r.profile !== null);
+    expect(nonNull.length).toBeGreaterThan(0);
+    for (const r of nonNull) {
+      expect(r.profile?.bio).toBe('Custom bio');
+      expect(typeof r.profile?.website).toBe('string');
+    }
+  });
+
+  it('combines with regular overrides', () => {
+    const result = fixture(schema)
+      .override('name', () => 'Alice')
+      .partialOverride('address', { city: () => 'Seattle' })
+      .one();
+
+    expect(result.name).toBe('Alice');
+    expect(result.address.city).toBe('Seattle');
+    expect(typeof result.address.street).toBe('string');
+  });
+
+  it('works with deeply nested schemas', () => {
+    const deep = z.object({
+      org: z.object({
+        location: z.object({
+          country: z.string(),
+          city: z.string(),
+        }),
+      }),
+    });
+
+    const result = fixture(deep)
+      .partialOverride('org', {
+        location: () => ({ country: 'US', city: 'Portland' }),
+      })
+      .one();
+
+    expect(result.org.location).toEqual({ country: 'US', city: 'Portland' });
+  });
+});
+
+describe('.for()', () => {
+  it('rebinds to a new schema keeping seed', () => {
+    const userSchema = z.object({ name: z.string(), age: z.number() });
+    const accountSchema = z.object({ name: z.string(), balance: z.number() });
+
+    const userGen = fixture(userSchema, { seed: 42 });
+    const accountGen = userGen.for(accountSchema);
+
+    const a = accountGen.one();
+    const b = fixture(accountSchema, { seed: 42 }).one();
+    expect(a).toEqual(b);
+  });
+
+  it('carries over overrides to new schema', () => {
+    const userSchema = z.object({ name: z.string(), email: z.email() });
+    const contactSchema = z.object({ name: z.string(), email: z.email(), phone: z.string() });
+
+    const gen = fixture(userSchema).override('email', () => 'shared@test.com');
+    const contactGen = gen.for(contactSchema);
+
+    const contact = contactGen.one();
+    expect(contact.email).toBe('shared@test.com');
+    expect(typeof contact.phone).toBe('string');
+  });
+
+  it('allows further overrides after rebinding', () => {
+    const userSchema = z.object({ name: z.string(), email: z.email() });
+    const accountSchema = z.object({ name: z.string(), type: z.string() });
+
+    const gen = fixture(userSchema, { seed: 42 }).override('name', () => 'Shared');
+    const accountGen = gen.for(accountSchema).override('type', () => 'Partner');
+
+    const account = accountGen.one();
+    expect(account.name).toBe('Shared');
+    expect(account.type).toBe('Partner');
+  });
+
+  it('does not mutate the original generator', () => {
+    const userSchema = z.object({ name: z.string() });
+    const otherSchema = z.object({ name: z.string(), extra: z.number() });
+
+    const original = fixture(userSchema).override('name', () => 'Original');
+    original.for(otherSchema).override('name', () => 'Changed');
+
+    expect(original.one().name).toBe('Original');
+  });
+});
+
 describe('fixture.create()', () => {
   it('is an alias for fixture', () => {
     const gen = fixture.create(z.object({ name: z.string() }), { seed: 42 });
@@ -95,6 +289,46 @@ describe('fixture.create()', () => {
   it('supports overrides', () => {
     const gen = fixture.create(z.object({ name: z.string() })).override('name', () => 'Test');
     expect(gen.one().name).toBe('Test');
+  });
+});
+
+describe('default values', () => {
+  it('uses schema default value', () => {
+    const schema = z.object({ role: z.string().default('viewer') });
+    const result = fixture(schema).one();
+    expect(result.role).toBe('viewer');
+  });
+
+  it('uses default on nullable field', () => {
+    const schema = z.object({ value: z.string().nullable().default(null) });
+    const result = fixture(schema).one();
+    expect(result.value).toBeNull();
+  });
+
+  it('uses default on optional field', () => {
+    const schema = z.object({ lang: z.string().optional().default('en') });
+    const result = fixture(schema).one();
+    expect(result.lang).toBe('en');
+  });
+
+  it('uses default for number', () => {
+    const schema = z.object({ count: z.number().default(0) });
+    const result = fixture(schema).one();
+    expect(result.count).toBe(0);
+  });
+
+  it('uses default for boolean', () => {
+    const schema = z.object({ active: z.boolean().default(true) });
+    const result = fixture(schema).one();
+    expect(result.active).toBe(true);
+  });
+
+  it('uses default consistently across many', () => {
+    const schema = z.object({ status: z.enum(['active', 'inactive']).default('active') });
+    const results = fixture(schema).many(10);
+    for (const r of results) {
+      expect(r.status).toBe('active');
+    }
   });
 });
 

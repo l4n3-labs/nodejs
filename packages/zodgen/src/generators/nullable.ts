@@ -13,7 +13,7 @@ export const generateOptional = <T>(ctx: GenContext<T | undefined>): unknown => 
 };
 
 export const generateDefault = <T>(ctx: GenContext<T>): unknown =>
-  ctx.generate(schemaDef<z.core.$ZodDefaultDef>(ctx.schema).innerType as z.ZodType);
+  schemaDef<z.core.$ZodDefaultDef>(ctx.schema).defaultValue;
 
 export const generateReadonly = <T>(ctx: GenContext<T>): unknown =>
   Object.freeze(ctx.generate(schemaDef<z.core.$ZodReadonlyDef>(ctx.schema).innerType as z.ZodType));
