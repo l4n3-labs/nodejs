@@ -1,5 +1,5 @@
 {
-  "name": "@l4n3/zodgen-usage",
+  "name": "@l4n3/style-dictionary",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -7,27 +7,29 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    }
+    },
+    "./tokens.css": "./dist/tokens/css/variables.css",
+    "./tokens.scss": "./dist/tokens/scss/variables.scss",
+    "./tokens.json": "./dist/tokens/json/tokens.json"
   },
   "scripts": {
-    "build": "tsgo --build",
+    "build": "node --experimental-strip-types src/build.ts && tsgo --build",
+    "build:tokens": "node --experimental-strip-types src/build.ts",
     "check": "tsgo --noEmit",
+    "test": "vitest run",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
-    "format": "biome format --write .",
-    "test": "vitest run"
-  },
-  "dependencies": {
-    "@faker-js/faker": "^9.0.0",
-    "@l4n3/zodgen": "workspace:*",
-    "zod": "^4.0.0-beta.0"
+    "format": "biome format --write ."
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",
     "@l4n3/biome-config": "workspace:*",
     "@l4n3/tsconfig": "workspace:*",
     "@l4n3/vitest-config": "workspace:*",
+    "@types/tinycolor2": "^1.4.6",
     "@typescript/native-preview": "^7.0.0-dev",
+    "style-dictionary": "^5.0.0",
+    "tinycolor2": "^1.6.0",
     "vitest": "^3.2.1"
   }
 }

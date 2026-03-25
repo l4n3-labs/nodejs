@@ -230,6 +230,25 @@ describe('.partialOverride()', () => {
 
     expect(result.org.location).toEqual({ country: 'US', city: 'Portland' });
   });
+
+  it('works with array-of-object fields', () => {
+    const schema = z.object({
+      tags: z
+        .array(z.object({ label: z.string(), color: z.string() }))
+        .min(2)
+        .max(4),
+    });
+
+    const result = fixture(schema)
+      .partialOverride('tags', { label: () => 'pinned' })
+      .one();
+
+    expect(result.tags.length).toBeGreaterThanOrEqual(2);
+    for (const tag of result.tags) {
+      expect(tag.label).toBe('pinned');
+      expect(typeof tag.color).toBe('string');
+    }
+  });
 });
 
 describe('.for()', () => {

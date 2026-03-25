@@ -1,4 +1,8 @@
 {
   "files": [],
-  "references": [{ "path": "packages/poc-utils" }, { "path": "packages/zodgen" }]
+  "references": [
+    { "path": "packages/poc-utils" },
+    { "path": "packages/style-dictionary" },
+    { "path": "packages/zodgen" }
+  ]
 }

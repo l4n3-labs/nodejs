@@ -3,9 +3,9 @@ import { z } from 'zod';
 
 // Restaurant menu schemas — interconnected types that model a full menu.
 
-const allergenSchema = z.enum(['gluten', 'dairy', 'nuts', 'shellfish', 'soy', 'eggs']);
+export const allergenSchema = z.enum(['gluten', 'dairy', 'nuts', 'shellfish', 'soy', 'eggs']);
 
-const menuItemSchema = z.object({
+export const menuItemSchema = z.object({
   id: z.uuid(),
   name: z.string().min(3).max(50),
   description: z.string().min(10).max(200),
@@ -16,12 +16,12 @@ const menuItemSchema = z.object({
   allergens: z.array(allergenSchema).max(4),
 });
 
-const menuSectionSchema = z.object({
+export const menuSectionSchema = z.object({
   title: z.string(),
   items: z.array(menuItemSchema).min(2).max(5),
 });
 
-const restaurantMenuSchema = z.object({
+export const restaurantMenuSchema = z.object({
   restaurantName: z.string(),
   updatedAt: z.date(),
   sections: z.array(menuSectionSchema).min(2).max(4),

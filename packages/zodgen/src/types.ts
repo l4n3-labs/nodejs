@@ -123,8 +123,10 @@ type PredicateOverride<T> = (
   generate: (ctx: GenContext<unknown>) => unknown,
 ) => FixtureGenerator<T>;
 
+type UnwrapArray<T> = T extends ReadonlyArray<infer E> ? E : T;
+
 type ObjectValueKeys<T> = {
-  [K in keyof T & string]: NonNullable<T[K]> extends Record<string, unknown> ? K : never;
+  [K in keyof T & string]: NonNullable<UnwrapArray<NonNullable<T[K]>>> extends Record<string, unknown> ? K : never;
 }[keyof T & string];
 
 type PartialOverrideGenerators<V> = {
@@ -155,7 +157,7 @@ export type FixtureGenerator<T> = {
   readonly partialOverride: T extends Record<string, unknown>
     ? <K extends ObjectValueKeys<T>>(
         key: K,
-        overrides: PartialOverrideGenerators<NonNullable<T[K]>>,
+        overrides: PartialOverrideGenerators<NonNullable<UnwrapArray<NonNullable<T[K]>>>>,
       ) => FixtureGenerator<T>
     : never;
   readonly generator: <D extends ZodDefType>(defType: D, gen: Generator<D>) => FixtureGenerator<T>;
