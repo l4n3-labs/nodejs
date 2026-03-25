@@ -91,6 +91,77 @@ describe('fixture.create()', () => {
   });
 });
 
+describe('override: real-world usage', () => {
+  const AccountSchema = z.object({
+    id: z.uuid(),
+    name: z.string().max(255),
+    type: z.string().nullable(),
+    deleted: z.coerce.date().max(new Date()).nullable(),
+    createdAt: z.coerce.date().max(new Date()),
+    createdBy: z.email().nullable(),
+    updatedAt: z.coerce.date().max(new Date()).nullable(),
+    updatedBy: z.email().nullable(),
+  });
+
+  it('overrides a field to a fixed value via string matcher', () => {
+    const gen = fixture.create(override('type', () => 'Partner'));
+    const account = gen.one(AccountSchema);
+    expect(account.type).toBe('Partner');
+  });
+
+  it('reuses generators with different overrides', () => {
+    const partnerGen = fixture.create(override('type', () => 'Partner'));
+    const vendorGen = fixture.create(override('type', () => 'Vendor'));
+    expect(partnerGen.one(AccountSchema).type).toBe('Partner');
+    expect(vendorGen.one(AccountSchema).type).toBe('Vendor');
+  });
+
+  it('applies custom null probability via predicate override', () => {
+    const gen = fixture.create(
+      override(
+        (ctx) => ctx.path.at(-1) === 'deleted',
+        (ctx) => (ctx.faker.number.float() < 0.15 ? null : ctx.faker.date.recent()),
+      ),
+    );
+    const results = gen.many(AccountSchema, 200);
+    const nullCount = results.filter((r) => r.deleted === null).length;
+    const nonNullCount = results.filter((r) => r.deleted !== null).length;
+    expect(nullCount).toBeGreaterThan(0);
+    expect(nonNullCount).toBeGreaterThan(0);
+    // ~15% null — allow 5-35% range for statistical tolerance
+    expect(nullCount).toBeGreaterThan(10);
+    expect(nullCount).toBeLessThan(70);
+  });
+
+  it('combines multiple overrides on the same schema', () => {
+    const gen = fixture.create(
+      override('type', () => 'Partner'),
+      override(
+        (ctx) => ctx.path.at(-1) === 'deleted',
+        (ctx) => (ctx.faker.number.float() < 0.15 ? null : ctx.faker.date.recent()),
+      ),
+    );
+    const results = gen.many(AccountSchema, 50);
+    for (const account of results) {
+      expect(account.type).toBe('Partner');
+      expect(account.deleted === null || account.deleted instanceof Date).toBe(true);
+    }
+  });
+
+  it('generates many fixtures for batch testing', () => {
+    const gen = fixture.create(
+      withSeed(42),
+      override('type', () => 'Partner'),
+    );
+    const accounts = gen.many(AccountSchema, 10);
+    expect(accounts).toHaveLength(10);
+    for (const account of accounts) {
+      expect(account.type).toBe('Partner');
+      expect(account.id).toMatch(/^[0-9a-f]{8}-/);
+    }
+  });
+});
+
 describe('integration: nested schemas', () => {
   it('handles objects with arrays of objects', () => {
     const schema = z.object({

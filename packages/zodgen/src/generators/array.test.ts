@@ -20,9 +20,8 @@ const createRecursiveCtx = (
 ): GenContext<unknown> =>
   createContext(schema, testConfig, [], 0, faker ?? createTestFaker(), generate as GenContext<unknown>['generate']);
 
-const makeSimpleGenerate =
-  (faker: Faker) =>
-  (schema: z.ZodType, _key?: string): unknown => {
+const makeSimpleGenerate = (faker: Faker) => {
+  const generate = (schema: z.ZodType, _key?: string): unknown => {
     const type = (schema as any)._zod.def.type as string;
     switch (type) {
       case 'string':
@@ -35,10 +34,16 @@ const makeSimpleGenerate =
         const values = (schema as any)._zod.def.values as unknown[];
         return values[0];
       }
+      case 'union': {
+        const options = (schema as any)._zod.def.options as z.ZodType[];
+        return generate(faker.helpers.arrayElement(options), _key);
+      }
       default:
         return null;
     }
   };
+  return generate;
+};
 
 describe('generateArray', () => {
   it('generates an array of elements', () => {
@@ -114,7 +119,35 @@ describe('generateArray', () => {
       const result = generateArray(ctx);
       expect(result.length).toBeGreaterThanOrEqual(1);
       expect(result.length).toBeLessThanOrEqual(3);
-      z.string().or(z.number());
     }
+  });
+
+  it('generates union elements with equal distribution for 2 options', () => {
+    const schema = z.array(z.string().or(z.number())).length(100);
+    const faker = createTestFaker(42);
+    const ctx = createRecursiveCtx(schema, makeSimpleGenerate(faker), faker);
+    const result = generateArray(ctx);
+    const strings = result.filter((item) => typeof item === 'string');
+    const numbers = result.filter((item) => typeof item === 'number');
+    expect(strings.length).toBeGreaterThan(0);
+    expect(numbers.length).toBeGreaterThan(0);
+    expect(strings.length).toBeGreaterThan(20);
+    expect(numbers.length).toBeGreaterThan(20);
+  });
+
+  it('generates union elements with equal distribution for 3 options', () => {
+    const schema = z.array(z.union([z.string(), z.number(), z.boolean()])).length(150);
+    const faker = createTestFaker(42);
+    const ctx = createRecursiveCtx(schema, makeSimpleGenerate(faker), faker);
+    const result = generateArray(ctx);
+    const strings = result.filter((item) => typeof item === 'string');
+    const numbers = result.filter((item) => typeof item === 'number');
+    const booleans = result.filter((item) => typeof item === 'boolean');
+    expect(strings.length).toBeGreaterThan(0);
+    expect(numbers.length).toBeGreaterThan(0);
+    expect(booleans.length).toBeGreaterThan(0);
+    expect(strings.length).toBeGreaterThan(20);
+    expect(numbers.length).toBeGreaterThan(20);
+    expect(booleans.length).toBeGreaterThan(20);
   });
 });
