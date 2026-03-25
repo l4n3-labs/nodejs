@@ -2,6 +2,7 @@ import { base, en, Faker } from '@faker-js/faker';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod/v4';
 import { createContext } from '../context.js';
+import { schemaDef } from '../schema-def.js';
 import type { GenContext, GeneratorConfig } from '../types.js';
 import { generateSet } from './set.js';
 
@@ -23,7 +24,7 @@ const createRecursiveCtx = (
 const makeSimpleGenerate =
   (faker: Faker) =>
   (schema: z.ZodType, _key?: string): unknown => {
-    const type = (schema as any)._zod.def.type as string;
+    const { type } = schemaDef(schema);
     switch (type) {
       case 'string':
         return faker.string.alpha(5);
@@ -32,7 +33,7 @@ const makeSimpleGenerate =
       case 'boolean':
         return faker.datatype.boolean();
       case 'literal': {
-        const values = (schema as any)._zod.def.values as unknown[];
+        const { values } = schemaDef<{ values: unknown[] }>(schema);
         return values[0];
       }
       default:

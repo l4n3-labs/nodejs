@@ -2,6 +2,7 @@ import { base, en, Faker } from '@faker-js/faker';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod/v4';
 import { createContext } from '../context.js';
+import { schemaDef } from '../schema-def.js';
 import type { GenContext, GeneratorConfig } from '../types.js';
 import { generateCatch, generateDefault, generateNullable, generateOptional, generateReadonly } from './nullable.js';
 
@@ -22,8 +23,10 @@ const createRecursiveCtx = <T>(
 
 const makeDispatch = (faker: Faker): any => {
   const dispatch = (schema: z.ZodType): unknown => {
-    const def = schema._zod.def as any;
-    const type = def.type;
+    const def = schemaDef<{ type: string; values: unknown[]; shape: Record<string, z.ZodType>; element: z.ZodType }>(
+      schema,
+    );
+    const { type } = def;
     const ctx = createContext(schema, testConfig, [], 0, faker, dispatch as any);
     switch (type) {
       case 'string':

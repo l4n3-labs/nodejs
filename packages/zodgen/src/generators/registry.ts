@@ -1,4 +1,4 @@
-import type { Generator } from '../types.js';
+import type { Generator, ZodDefType } from '../types.js';
 import { generateArray } from './array.js';
 import { generateBigInt } from './bigint.js';
 import { generateBoolean } from './boolean.js';
@@ -30,7 +30,7 @@ import { generateTuple } from './tuple.js';
 import { generateUnion } from './union.js';
 
 // biome-ignore lint/suspicious/noExplicitAny: generators have heterogeneous signatures that are resolved at runtime
-export const generators: ReadonlyMap<string, Generator> = new Map<string, any>([
+export const generators: ReadonlyMap<ZodDefType, Generator> = new Map<ZodDefType, any>([
   ['string', generateString],
   ['number', generateNumber],
   ['boolean', generateBoolean],

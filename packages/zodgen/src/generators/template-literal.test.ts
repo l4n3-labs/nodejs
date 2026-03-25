@@ -2,6 +2,7 @@ import { base, en, Faker } from '@faker-js/faker';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod/v4';
 import { createContext } from '../context.js';
+import { schemaDef } from '../schema-def.js';
 import type { GenContext, GeneratorConfig } from '../types.js';
 import { generateTemplateLiteral } from './template-literal.js';
 
@@ -23,7 +24,7 @@ const createRecursiveCtx = (
 const makeSimpleGenerate =
   (faker: Faker) =>
   (schema: z.ZodType, _key?: string): unknown => {
-    const type = (schema as any)._zod.def.type as string;
+    const { type } = schemaDef(schema);
     switch (type) {
       case 'string':
         return faker.string.alpha(5);
@@ -32,7 +33,7 @@ const makeSimpleGenerate =
       case 'boolean':
         return faker.datatype.boolean();
       case 'literal': {
-        const values = (schema as any)._zod.def.values as unknown[];
+        const { values } = schemaDef<{ values: unknown[] }>(schema);
         return values[0];
       }
       default:
@@ -45,7 +46,7 @@ describe('generateTemplateLiteral', () => {
     const schema = z.templateLiteral([z.literal('hello'), z.literal('-'), z.literal('world')]);
     const faker = createTestFaker(1);
     const generate = (s: z.ZodType, _key?: string): unknown => {
-      const def = (s as any)._zod.def;
+      const def = schemaDef<{ type: string; values: unknown[] }>(s);
       if (def.type === 'literal') return def.values[0];
       return makeSimpleGenerate(faker)(s, _key);
     };
@@ -59,7 +60,7 @@ describe('generateTemplateLiteral', () => {
     const schema = z.templateLiteral([z.literal('user-'), z.number()]);
     const faker = createTestFaker(1);
     const generate = (s: z.ZodType, _key?: string): unknown => {
-      const def = (s as any)._zod.def;
+      const def = schemaDef<{ type: string; values: unknown[] }>(s);
       if (def.type === 'literal') return def.values[0];
       if (def.type === 'number') return 42;
       return makeSimpleGenerate(faker)(s, _key);
@@ -75,7 +76,7 @@ describe('generateTemplateLiteral', () => {
     const schema = z.templateLiteral([z.literal('test')]);
     const faker = createTestFaker(1);
     const generate = (s: z.ZodType, _key?: string): unknown => {
-      const def = (s as any)._zod.def;
+      const def = schemaDef<{ type: string; values: unknown[] }>(s);
       if (def.type === 'literal') return def.values[0];
       return null;
     };

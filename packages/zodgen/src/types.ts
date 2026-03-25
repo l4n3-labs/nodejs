@@ -64,6 +64,8 @@ export type GenContext<T> = {
 
 // --- Generator ---
 
+export type ZodDefType = z.core.$ZodTypeDef['type'];
+
 export type Generator = <T>(ctx: GenContext<T>) => T;
 
 // --- Public API ---

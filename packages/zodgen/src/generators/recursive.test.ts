@@ -2,6 +2,7 @@ import { base, en, Faker } from '@faker-js/faker';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod/v4';
 import { createContext } from '../context.js';
+import { schemaDef } from '../schema-def.js';
 import type { GenContext, GeneratorConfig } from '../types.js';
 import { generateLazy, generatePipe, generatePromise } from './recursive.js';
 
@@ -22,8 +23,8 @@ const createRecursiveCtx = <T>(
 
 const makeDispatch = (faker: Faker): any => {
   const dispatch = (schema: z.ZodType): unknown => {
-    const def = schema._zod.def as any;
-    const type = def.type;
+    const def = schemaDef<{ type: string; values: unknown[] }>(schema);
+    const { type } = def;
     const ctx = createContext(schema, testConfig, [], 0, faker, dispatch as any);
     switch (type) {
       case 'string':
@@ -131,7 +132,7 @@ describe('generatePipe', () => {
     const dispatch = makeDispatch(faker);
     const ctx = createRecursiveCtx(schema, dispatch, faker);
     // def.type === 'pipe', def.in is z.string()
-    const def = (schema as any)._zod.def;
+    const def = schemaDef(schema);
     expect(def.type).toBe('pipe');
     const result = generatePipe(ctx);
     expect(typeof result).toBe('string');
