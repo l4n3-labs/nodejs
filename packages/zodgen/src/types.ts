@@ -1,11 +1,12 @@
-import type { Faker } from "@faker-js/faker";
-import type { z } from "zod/v4";
+import type { Faker } from '@faker-js/faker';
+import type { z } from 'zod/v4';
 
 // --- Config ---
 
 export type GeneratorConfig = {
   readonly seed: number | undefined;
-  readonly overrides: ReadonlyArray<Override>;
+  // biome-ignore lint/suspicious/noExplicitAny: overrides handle heterogeneous schema types at runtime
+  readonly overrides: ReadonlyArray<Override<any>>;
 };
 
 // --- Overrides ---
@@ -79,6 +80,3 @@ export type FixtureGenerator = {
 export type FixtureOptions = {
   readonly seed?: number;
 };
-
-// --- Helpers ---
-export type Optional<Value> = Exclude<Value, null> | undefined;

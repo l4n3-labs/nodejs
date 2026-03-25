@@ -2,7 +2,7 @@ import type { z } from 'zod/v4';
 import { schemaDef } from '../schema-def.js';
 import type { GenContext } from '../types.js';
 
-export const generateSet = (ctx: GenContext): Set<unknown> => {
+export const generateSet = <T>(ctx: GenContext<T>): Set<unknown> => {
   const { valueType } = schemaDef<z.core.$ZodSetDef>(ctx.schema);
   const { checks, faker } = ctx;
 
@@ -26,7 +26,7 @@ export const generateSet = (ctx: GenContext): Set<unknown> => {
     if (retries >= maxRetries) {
       throw new Error(`generateSet: could not generate ${count} unique values after ${maxRetries} retries`);
     }
-    const value = ctx.generate(valueType as z.ZodType);
+    const value = ctx.generate(valueType as z.ZodType<T>);
     if (!values.includes(value)) {
       values.push(value);
     } else {

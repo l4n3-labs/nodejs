@@ -41,7 +41,7 @@ console.log('with default:', withDefault);
 const readonlyUser = fixture(
   z
     .object({
-      id: z.string().uuid(),
+      id: z.uuid(),
       name: z.string(),
     })
     .readonly(),

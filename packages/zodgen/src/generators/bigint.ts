@@ -18,7 +18,7 @@ const resolveBigIntMax = (ltCheck: z.core.$ZodCheckLessThanDef | undefined): num
   return inclusive ? val : val - 1;
 };
 
-export const generateBigInt = (ctx: GenContext): bigint => {
+export const generateBigInt = <T = bigint>(ctx: GenContext<T>): bigint => {
   const { faker, checks } = ctx;
 
   const min = resolveBigIntMin(checks.find('greater_than'));

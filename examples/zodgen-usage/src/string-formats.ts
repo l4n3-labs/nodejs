@@ -3,28 +3,29 @@ import { z } from 'zod';
 
 // Generate strings with specific formats
 
-const email = fixture(z.string().email());
+const email = fixture(z.email());
 console.log('email:', email);
 
-const url = fixture(z.string().url());
+const url = fixture(z.url());
 console.log('url:', url);
 
-const uuid = fixture(z.string().uuid());
+const uuid = fixture(z.uuid());
 console.log('uuid:', uuid);
 
-const ipv4 = fixture(z.string().ipv4());
+const ipv4 = fixture(z.ipv4());
 console.log('ipv4:', ipv4);
 
-const ipv6 = fixture(z.string().ipv6());
+const ipv6 = fixture(z.ipv6());
+
 console.log('ipv6:', ipv6);
 
-const datetime = fixture(z.string().datetime());
+const datetime = fixture(z.iso.datetime());
 console.log('datetime:', datetime);
 
-const base64 = fixture(z.string().base64());
+const base64 = fixture(z.base64());
 console.log('base64:', base64);
 
-const emoji = fixture(z.string().emoji());
+const emoji = fixture(z.emoji());
 console.log('emoji:', emoji);
 
 // String length constraints

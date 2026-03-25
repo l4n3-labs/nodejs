@@ -29,7 +29,8 @@ import { generateTemplateLiteral } from './template-literal.js';
 import { generateTuple } from './tuple.js';
 import { generateUnion } from './union.js';
 
-export const generators: ReadonlyMap<string, Generator> = new Map([
+// biome-ignore lint/suspicious/noExplicitAny: generators have heterogeneous signatures that are resolved at runtime
+export const generators: ReadonlyMap<string, Generator> = new Map<string, any>([
   ['string', generateString],
   ['number', generateNumber],
   ['boolean', generateBoolean],

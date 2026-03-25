@@ -1,6 +1,6 @@
-import type { z } from "zod/v4";
-import { schemaDef } from "../schema-def.js";
-import type { GenContext, Optional } from "../types.js";
+import type { z } from 'zod/v4';
+import { schemaDef } from '../schema-def.js';
+import type { GenContext } from '../types.js';
 
 export const generateNullable = <T>(ctx: GenContext<T | null>): unknown => {
   const { innerType } = schemaDef<z.core.$ZodNullableDef>(ctx.schema);

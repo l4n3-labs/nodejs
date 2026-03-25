@@ -2,7 +2,7 @@ import { faker } from '@faker-js/faker';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod/v4';
 import { resolve } from './resolve.js';
-import type { GeneratorConfig } from './types.js';
+import type { GenContext, GeneratorConfig } from './types.js';
 
 const makeConfig = (overrides: GeneratorConfig['overrides'] = []): GeneratorConfig => ({
   seed: undefined,
@@ -53,7 +53,7 @@ describe('resolve', () => {
   it('applies predicate override', () => {
     const config = makeConfig([
       {
-        matcher: (ctx) => ctx.path.at(-1) === 'email',
+        matcher: (ctx: GenContext<unknown>) => ctx.path.at(-1) === 'email',
         generate: () => 'test@example.com',
       },
     ]);
@@ -112,7 +112,7 @@ describe('resolve', () => {
     const capturedPaths: Array<ReadonlyArray<string>> = [];
     const config = makeConfig([
       {
-        matcher: (ctx) => {
+        matcher: (ctx: GenContext<unknown>) => {
           capturedPaths.push(ctx.path);
           return false;
         },

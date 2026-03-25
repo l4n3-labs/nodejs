@@ -5,9 +5,9 @@ import { z } from 'zod';
 // Use fixture.create() to build a generator with overrides.
 
 const userSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string(),
-  email: z.string().email(),
+  email: z.email(),
   role: z.enum(['admin', 'editor', 'viewer']),
 });
 

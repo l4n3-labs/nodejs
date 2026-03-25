@@ -19,12 +19,12 @@ console.log('labeled tuple:', labeled);
 
 // Sets
 
-const uniqueEmails = fixture(z.set(z.string().email()).min(2).max(4));
+const uniqueEmails = fixture(z.set(z.email()).min(2).max(4));
 console.log('unique emails:', uniqueEmails);
 
 // Maps
 
-const userRoles = fixture(z.map(z.string().uuid(), z.enum(['admin', 'user'])));
+const userRoles = fixture(z.map(z.uuid(), z.enum(['admin', 'user'])));
 console.log('user roles map:', userRoles);
 
 // Records

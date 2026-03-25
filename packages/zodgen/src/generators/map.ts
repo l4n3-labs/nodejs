@@ -2,7 +2,7 @@ import type { z } from 'zod/v4';
 import { schemaDef } from '../schema-def.js';
 import type { GenContext } from '../types.js';
 
-export const generateMap = (ctx: GenContext): Map<unknown, unknown> => {
+export const generateMap = <T>(ctx: GenContext<T>): Map<unknown, unknown> => {
   const def = schemaDef<z.core.$ZodMapDef>(ctx.schema);
   const { checks, faker } = ctx;
 
@@ -16,7 +16,8 @@ export const generateMap = (ctx: GenContext): Map<unknown, unknown> => {
 
   const entries = Array.from(
     { length: count },
-    () => [ctx.generate(def.keyType as z.ZodType), ctx.generate(def.valueType as z.ZodType)] as [unknown, unknown],
+    () =>
+      [ctx.generate(def.keyType as z.ZodType<T>), ctx.generate(def.valueType as z.ZodType<T>)] as [unknown, unknown],
   );
 
   return new Map(entries);

@@ -75,7 +75,7 @@ describe('generateString', () => {
   });
 
   it('returns valid email for string_format email', () => {
-    const result = generateString(createTestCtx(z.string().email()));
+    const result = generateString(createTestCtx(z.email()));
     expect(result).toContain('@');
   });
 
@@ -85,7 +85,7 @@ describe('generateString', () => {
   });
 
   it('returns a uuid for string_format uuid', () => {
-    const result = generateString(createTestCtx(z.string().uuid()));
+    const result = generateString(createTestCtx(z.uuid()));
     expect(result).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i);
   });
 

@@ -11,7 +11,7 @@ console.log('role:', role);
 
 const userSchema = z.object({
   name: z.string(),
-  email: z.string().email(),
+  email: z.email(),
   age: z.number().int().min(18).max(99),
   role: roleSchema,
   active: z.boolean(),
@@ -27,7 +27,7 @@ const companySchema = z.object({
   founded: z.date(),
   ceo: z.object({
     name: z.string(),
-    email: z.string().email(),
+    email: z.email(),
   }),
   address: z.object({
     street: z.string(),
