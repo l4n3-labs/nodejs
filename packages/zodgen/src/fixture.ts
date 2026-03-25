@@ -1,8 +1,8 @@
 import { base, en, Faker } from '@faker-js/faker';
 import type { z } from 'zod/v4';
-import { applyTransforms, defaultConfig } from './config.js';
+import { defaultConfig } from './config.js';
 import { resolve } from './resolve.js';
-import type { FixtureGenerator, FixtureOptions, GeneratorConfig, Transform } from './types.js';
+import type { FixtureGenerator, FixtureOptions, GeneratorConfig } from './types.js';
 
 const createFaker = (seed: number | undefined): Faker => {
   const f = new Faker({ locale: [en, base] });
@@ -20,28 +20,31 @@ const generateMany = <T>(
   faker: Faker,
 ): ReadonlyArray<T> => Array.from({ length: count }, () => resolve(schema, config, [], 0, faker) as T);
 
-export const fixture = Object.assign(
-  <T>(schema: z.ZodType<T>, opts?: FixtureOptions): T => {
-    const f = createFaker(opts?.seed);
-    return generateOne(schema, defaultConfig, f);
+const createGenerator = <T>(schema: z.ZodType<T>, config: GeneratorConfig): FixtureGenerator<T> => ({
+  one: (): T => {
+    const f = createFaker(config.seed);
+    return generateOne(schema, config, f);
   },
+  many: (count: number): ReadonlyArray<T> => {
+    const f = createFaker(config.seed);
+    return generateMany(schema, count, config, f);
+  },
+  seed: (seed: number): FixtureGenerator<T> => createGenerator(schema, { ...config, seed }),
+  override: ((
+    matcherOrKey: string | ((ctx: unknown) => boolean),
+    generate: (ctx: unknown) => unknown,
+  ): FixtureGenerator<T> =>
+    createGenerator(schema, {
+      ...config,
+      overrides: [...config.overrides, { matcher: matcherOrKey, generate }],
+    })) as FixtureGenerator<T>['override'],
+});
+
+export const fixture = Object.assign(
+  <T>(schema: z.ZodType<T>, opts?: FixtureOptions): FixtureGenerator<T> =>
+    createGenerator(schema, { ...defaultConfig, seed: opts?.seed }),
   {
-    many: <T>(schema: z.ZodType<T>, count: number, opts?: FixtureOptions): ReadonlyArray<T> => {
-      const f = createFaker(opts?.seed);
-      return generateMany(schema, count, defaultConfig, f);
-    },
-    create: (...transforms: ReadonlyArray<Transform>): FixtureGenerator => {
-      const config = applyTransforms(transforms);
-      return {
-        one: <T>(schema: z.ZodType<T>): T => {
-          const f = createFaker(config.seed);
-          return generateOne(schema, config, f);
-        },
-        many: <T>(schema: z.ZodType<T>, count: number): ReadonlyArray<T> => {
-          const f = createFaker(config.seed);
-          return generateMany(schema, count, config, f);
-        },
-      };
-    },
+    create: <T>(schema: z.ZodType<T>, opts?: FixtureOptions): FixtureGenerator<T> =>
+      createGenerator(schema, { ...defaultConfig, seed: opts?.seed }),
   },
 );

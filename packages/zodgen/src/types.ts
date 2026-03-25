@@ -66,15 +66,25 @@ export type GenContext<T> = {
 
 export type Generator = <T>(ctx: GenContext<T>) => T;
 
-// --- Transform ---
-
-export type Transform = (config: GeneratorConfig) => GeneratorConfig;
-
 // --- Public API ---
 
-export type FixtureGenerator = {
-  readonly one: <T>(schema: z.ZodType<T>) => T;
-  readonly many: <T>(schema: z.ZodType<T>, count: number) => ReadonlyArray<T>;
+type ObjectOverride<T> = <K extends keyof T & string>(
+  key: K,
+  generate: (ctx: GenContext<T[K]>) => T[K],
+) => FixtureGenerator<T>;
+
+type PredicateOverride<T> = (
+  matcher: (ctx: GenContext<unknown>) => boolean,
+  generate: (ctx: GenContext<unknown>) => unknown,
+) => FixtureGenerator<T>;
+
+export type FixtureGenerator<T> = {
+  readonly one: () => T;
+  readonly many: (count: number) => ReadonlyArray<T>;
+  readonly seed: (seed: number) => FixtureGenerator<T>;
+  readonly override: T extends Record<string, unknown>
+    ? ObjectOverride<T> & PredicateOverride<T>
+    : PredicateOverride<T>;
 };
 
 export type FixtureOptions = {

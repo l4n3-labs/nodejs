@@ -1,8 +1,8 @@
-import { fixture, override, withSeed } from '@l4n3/zodgen';
+import { fixture } from '@l4n3/zodgen';
 import { z } from 'zod';
 
 // Overrides let you customize how specific fields are generated.
-// Use fixture.create() to build a generator with overrides.
+// Use .override() on a fixture generator to customize fields.
 
 const userSchema = z.object({
   id: z.uuid(),
@@ -11,41 +11,35 @@ const userSchema = z.object({
   role: z.enum(['admin', 'editor', 'viewer']),
 });
 
-// String matcher — matches fields by path segment name
+// String key override — type-safe, autocompletes from schema keys
 
-const gen = fixture.create(
-  override('email', () => 'test@example.com'),
-  override('role', () => 'admin' as const),
-);
+const gen = fixture(userSchema)
+  .override('email', () => 'test@example.com')
+  .override('role', () => 'admin' as const);
 
-const user = gen.one(userSchema);
+const user = gen.one();
 console.log('overridden user:', user);
 console.log('email is test@example.com?', user.email === 'test@example.com');
 console.log('role is admin?', user.role === 'admin');
 
 // Predicate matcher — match based on schema context
 
-const emailOverrideGen = fixture.create(
-  override(
-    (ctx) => {
-      const formatCheck = ctx.checks.find('string_format');
-      return formatCheck !== undefined && 'format' in formatCheck && formatCheck.format === 'email';
-    },
-    () => 'predicate@test.com',
-  ),
+const emailOverrideGen = fixture(userSchema).override(
+  (ctx) => {
+    const formatCheck = ctx.checks.find('string_format');
+    return formatCheck !== undefined && 'format' in formatCheck && formatCheck.format === 'email';
+  },
+  () => 'predicate@test.com',
 );
 
-const user2 = emailOverrideGen.one(userSchema);
+const user2 = emailOverrideGen.one();
 console.log('predicate override email:', user2.email);
 
 // Combining overrides with seeding
 
-const deterministicGen = fixture.create(
-  withSeed(42),
-  override('id', () => '00000000-0000-0000-0000-000000000001'),
-);
+const deterministicGen = fixture(userSchema, { seed: 42 }).override('id', () => '00000000-0000-0000-0000-000000000001');
 
-const user3 = deterministicGen.one(userSchema);
+const user3 = deterministicGen.one();
 console.log('seeded + overridden:', user3);
 
 // Overrides work with nested schemas too
@@ -56,7 +50,10 @@ const teamSchema = z.object({
   members: z.array(userSchema).min(2).max(4),
 });
 
-const teamGen = fixture.create(override('email', (ctx) => `user-${ctx.path.join('.')}@test.com`));
+const teamGen = fixture(teamSchema).override(
+  (ctx) => ctx.path.at(-1) === 'email',
+  (ctx) => `user-${ctx.path.join('.')}@test.com`,
+);
 
-const team = teamGen.one(teamSchema);
+const team = teamGen.one();
 console.log('team:', JSON.stringify(team, null, 2));

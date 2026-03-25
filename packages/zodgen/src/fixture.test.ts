@@ -1,12 +1,10 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod/v4';
 import { fixture } from './fixture.js';
-import { override } from './transforms/override.js';
-import { withSeed } from './transforms/seed.js';
 
 describe('fixture()', () => {
   it('generates a value from a simple schema', () => {
-    const result = fixture(z.string());
+    const result = fixture(z.string()).one();
     expect(typeof result).toBe('string');
   });
 
@@ -17,7 +15,7 @@ describe('fixture()', () => {
       age: z.number().min(18).max(99),
       role: z.enum(['admin', 'user']),
     });
-    const result = fixture(schema);
+    const result = fixture(schema).one();
     expect(typeof result.name).toBe('string');
     expect(result.email).toContain('@');
     expect(result.age).toBeGreaterThanOrEqual(18);
@@ -27,67 +25,76 @@ describe('fixture()', () => {
 
   it('supports seeded determinism', () => {
     const schema = z.object({ name: z.string(), age: z.number() });
-    const a = fixture(schema, { seed: 42 });
-    const b = fixture(schema, { seed: 42 });
+    const a = fixture(schema, { seed: 42 }).one();
+    const b = fixture(schema, { seed: 42 }).one();
     expect(a).toEqual(b);
   });
 });
 
-describe('fixture.many()', () => {
+describe('.many()', () => {
   it('generates correct count', () => {
-    const results = fixture.many(z.string(), 5);
+    const results = fixture(z.string()).many(5);
     expect(results).toHaveLength(5);
     for (const r of results) expect(typeof r).toBe('string');
   });
 
   it('generates varied values with seed', () => {
-    const results = fixture.many(z.number(), 5, { seed: 42 });
-    // With a shared faker, values should vary
+    const results = fixture(z.number(), { seed: 42 }).many(5);
     const unique = new Set(results);
     expect(unique.size).toBeGreaterThan(1);
   });
 });
 
-describe('fixture.create()', () => {
-  it('returns generator with one and many', () => {
-    const gen = fixture.create(withSeed(42));
-    const result = gen.one(z.string());
-    expect(typeof result).toBe('string');
+describe('.seed()', () => {
+  it('returns a new generator with seed applied', () => {
+    const schema = z.object({ name: z.string(), age: z.number() });
+    const gen = fixture(schema).seed(42);
+    const a = gen.one();
+    const b = fixture(schema).seed(42).one();
+    expect(a).toEqual(b);
   });
+});
 
-  it('applies overrides', () => {
-    const gen = fixture.create(override('email', () => 'custom@test.com'));
+describe('.override()', () => {
+  it('applies string key override', () => {
     const schema = z.object({ email: z.string().email() });
-    const result = gen.one(schema);
+    const result = fixture(schema)
+      .override('email', () => 'custom@test.com')
+      .one();
     expect(result.email).toBe('custom@test.com');
   });
 
-  it('many generates correct count', () => {
-    const gen = fixture.create(withSeed(42));
-    const results = gen.many(z.number(), 3);
-    expect(results).toHaveLength(3);
-  });
-
   it('first registered override wins', () => {
-    const gen = fixture.create(
-      override('name', () => 'First'),
-      override('name', () => 'Second'),
-    );
-    const result = gen.one(z.object({ name: z.string() }));
+    const result = fixture(z.object({ name: z.string() }))
+      .override('name', () => 'First')
+      .override('name', () => 'Second')
+      .one();
     expect(result.name).toBe('First');
   });
 
   it('predicate override works', () => {
-    const gen = fixture.create(
-      override(
+    const schema = z.object({ email: z.string().email(), name: z.string() });
+    const result = fixture(schema)
+      .override(
         (ctx) => ctx.checks.has('string_format') && ctx.checks.find('string_format')?.format === 'email',
         () => 'predicate@test.com',
-      ),
-    );
-    const schema = z.object({ email: z.string().email(), name: z.string() });
-    const result = gen.one(schema);
+      )
+      .one();
     expect(result.email).toBe('predicate@test.com');
     expect(typeof result.name).toBe('string');
+  });
+});
+
+describe('fixture.create()', () => {
+  it('is an alias for fixture', () => {
+    const gen = fixture.create(z.object({ name: z.string() }), { seed: 42 });
+    const result = gen.one();
+    expect(typeof result.name).toBe('string');
+  });
+
+  it('supports overrides', () => {
+    const gen = fixture.create(z.object({ name: z.string() })).override('name', () => 'Test');
+    expect(gen.one().name).toBe('Test');
   });
 });
 
@@ -103,27 +110,26 @@ describe('override: real-world usage', () => {
     updatedBy: z.email().nullable(),
   });
 
-  it('overrides a field to a fixed value via string matcher', () => {
-    const gen = fixture.create(override('type', () => 'Partner'));
-    const account = gen.one(AccountSchema);
+  it('overrides a field to a fixed value via string key', () => {
+    const account = fixture(AccountSchema)
+      .override('type', () => 'Partner')
+      .one();
     expect(account.type).toBe('Partner');
   });
 
   it('reuses generators with different overrides', () => {
-    const partnerGen = fixture.create(override('type', () => 'Partner'));
-    const vendorGen = fixture.create(override('type', () => 'Vendor'));
-    expect(partnerGen.one(AccountSchema).type).toBe('Partner');
-    expect(vendorGen.one(AccountSchema).type).toBe('Vendor');
+    const partnerGen = fixture(AccountSchema).override('type', () => 'Partner');
+    const vendorGen = fixture(AccountSchema).override('type', () => 'Vendor');
+    expect(partnerGen.one().type).toBe('Partner');
+    expect(vendorGen.one().type).toBe('Vendor');
   });
 
   it('applies custom null probability via predicate override', () => {
-    const gen = fixture.create(
-      override(
-        (ctx) => ctx.path.at(-1) === 'deleted',
-        (ctx) => (ctx.faker.number.float() < 0.15 ? null : ctx.faker.date.recent()),
-      ),
+    const gen = fixture(AccountSchema).override(
+      (ctx) => ctx.path.at(-1) === 'deleted',
+      (ctx) => (ctx.faker.number.float() < 0.15 ? null : ctx.faker.date.recent()),
     );
-    const results = gen.many(AccountSchema, 200);
+    const results = gen.many(200);
     const nullCount = results.filter((r) => r.deleted === null).length;
     const nonNullCount = results.filter((r) => r.deleted !== null).length;
     expect(nullCount).toBeGreaterThan(0);
@@ -134,14 +140,13 @@ describe('override: real-world usage', () => {
   });
 
   it('combines multiple overrides on the same schema', () => {
-    const gen = fixture.create(
-      override('type', () => 'Partner'),
-      override(
+    const gen = fixture(AccountSchema)
+      .override('type', () => 'Partner')
+      .override(
         (ctx) => ctx.path.at(-1) === 'deleted',
         (ctx) => (ctx.faker.number.float() < 0.15 ? null : ctx.faker.date.recent()),
-      ),
-    );
-    const results = gen.many(AccountSchema, 50);
+      );
+    const results = gen.many(50);
     for (const account of results) {
       expect(account.type).toBe('Partner');
       expect(account.deleted === null || account.deleted instanceof Date).toBe(true);
@@ -149,11 +154,9 @@ describe('override: real-world usage', () => {
   });
 
   it('generates many fixtures for batch testing', () => {
-    const gen = fixture.create(
-      withSeed(42),
-      override('type', () => 'Partner'),
-    );
-    const accounts = gen.many(AccountSchema, 10);
+    const accounts = fixture(AccountSchema, { seed: 42 })
+      .override('type', () => 'Partner')
+      .many(10);
     expect(accounts).toHaveLength(10);
     for (const account of accounts) {
       expect(account.type).toBe('Partner');
@@ -175,7 +178,7 @@ describe('integration: nested schemas', () => {
         .min(1)
         .max(3),
     });
-    const result = fixture(schema);
+    const result = fixture(schema).one();
     expect(result.users.length).toBeGreaterThanOrEqual(1);
     for (const user of result.users) {
       expect(typeof user.name).toBe('string');
@@ -188,7 +191,7 @@ describe('integration: nested schemas', () => {
       required: z.string(),
       optional: z.string().optional(),
     });
-    const result = fixture(schema);
+    const result = fixture(schema).one();
     expect(typeof result.required).toBe('string');
   });
 
@@ -196,7 +199,7 @@ describe('integration: nested schemas', () => {
     const schema = z.object({
       value: z.string().nullable(),
     });
-    const result = fixture(schema);
+    const result = fixture(schema).one();
     expect(result.value === null || typeof result.value === 'string').toBe(true);
   });
 
@@ -206,30 +209,30 @@ describe('integration: nested schemas', () => {
       value: z.string(),
       children: z.array(z.lazy(() => treeSchema)),
     });
-    const result = fixture(treeSchema);
+    const result = fixture(treeSchema).one();
     expect(typeof result.value).toBe('string');
     expect(Array.isArray(result.children)).toBe(true);
   });
 
   it('throws for custom schemas with helpful message', () => {
     const schema = z.custom<string>();
-    expect(() => fixture(schema)).toThrow(/override/);
+    expect(() => fixture(schema).one()).toThrow(/override/);
   });
 
   it('handles enum schemas', () => {
     const schema = z.enum(['red', 'green', 'blue']);
-    const result = fixture(schema);
+    const result = fixture(schema).one();
     expect(['red', 'green', 'blue']).toContain(result);
   });
 
   it('handles literal schemas', () => {
-    expect(fixture(z.literal('hello'))).toBe('hello');
-    expect(fixture(z.literal(42))).toBe(42);
+    expect(fixture(z.literal('hello')).one()).toBe('hello');
+    expect(fixture(z.literal(42)).one()).toBe(42);
   });
 
   it('handles union schemas', () => {
     const schema = z.union([z.string(), z.number()]);
-    const result = fixture(schema);
+    const result = fixture(schema).one();
     expect(typeof result === 'string' || typeof result === 'number').toBe(true);
   });
 });

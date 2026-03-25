@@ -4,7 +4,7 @@ import { z } from 'zod';
 // Enums
 
 const roleSchema = z.enum(['admin', 'editor', 'viewer']);
-const role = fixture(roleSchema);
+const role = fixture(roleSchema).one();
 console.log('role:', role);
 
 // Simple object
@@ -17,7 +17,7 @@ const userSchema = z.object({
   active: z.boolean(),
 });
 
-const user = fixture(userSchema);
+const user = fixture(userSchema).one();
 console.log('user:', user);
 
 // Nested objects
@@ -37,10 +37,10 @@ const companySchema = z.object({
   }),
 });
 
-const company = fixture(companySchema);
+const company = fixture(companySchema).one();
 console.log('company:', JSON.stringify(company, null, 2));
 
 // Generate multiple objects
 
-const users = fixture.many(userSchema, 3);
+const users = fixture(userSchema).many(3);
 console.log('3 users:', JSON.stringify(users, null, 2));
