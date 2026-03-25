@@ -44,6 +44,52 @@ importers:
         specifier: ^7.0.0-dev
         version: 7.0.0-dev.20260324.1
 
+  examples/zodgen-benchmark:
+    dependencies:
+      '@faker-js/faker':
+        specifier: ^9.0.0
+        version: 9.9.0
+      '@l4n3/zodgen':
+        specifier: workspace:*
+        version: link:../../packages/zodgen
+      zod:
+        specifier: ^4.0.0-beta.0
+        version: 4.3.6
+    devDependencies:
+      '@biomejs/biome':
+        specifier: ^2.4.8
+        version: 2.4.8
+      '@l4n3/biome-config':
+        specifier: workspace:*
+        version: link:../../configs/biome
+      '@l4n3/tsconfig':
+        specifier: workspace:*
+        version: link:../../configs/typescript
+      '@l4n3/vitest-config':
+        specifier: workspace:*
+        version: link:../../configs/vitest
+      '@typescript/native-preview':
+        specifier: ^7.0.0-dev
+        version: 7.0.0-dev.20260324.1
+      vitest:
+        specifier: ^3.2.1
+        version: 3.2.4(@types/node@22.19.15)
+      zocker:
+        specifier: ^3.0.0
+        version: 3.0.0(zod@4.3.6)
+      zod-fixture:
+        specifier: ^2.5.2
+        version: 2.5.2(zod@4.3.6)
+      zod-mocking:
+        specifier: ^0.2.1
+        version: 0.2.1
+      zod-schema-faker:
+        specifier: ^2.1.1
+        version: 2.1.1(@faker-js/faker@9.9.0)(randexp@0.5.3)(zod@4.3.6)
+      zodock:
+        specifier: ^0.1.0
+        version: 0.1.0(zod@4.3.6)
+
   examples/zodgen-usage:
     dependencies:
       '@faker-js/faker':
@@ -435,6 +481,10 @@ packages:
     engines: {node: '>=18'}
     cpu: [x64]
     os: [win32]
+
+  '@faker-js/faker@10.4.0':
+    resolution: {integrity: sha512-sDBWI3yLy8EcDzgobvJTWq1MJYzAkQdpjXuPukga9wXonhpMRvd1Izuo2Qgwey2OiEoRIBr35RMU9HJRoOHzpw==}
+    engines: {node: ^20.19.0 || ^22.13.0 || ^23.5.0 || >=24.0.0, npm: '>=10'}
 
   '@faker-js/faker@9.9.0':
     resolution: {integrity: sha512-OEl393iCOoo/z8bMezRlJu+GlRGlsKbUAN7jKB6LhnKoqKve5DXRpalbItIIcwnCjs1k/FOPjFzcA6Qn+H+YbA==}
@@ -990,6 +1040,10 @@ packages:
     resolution: {integrity: sha512-8QmQKqEASLd5nx0U1B1okLElbUuuttJ/AnYmRXbbbGDWh6uS208EjD4Xqq/I9wK7u0v6O08XhTWnt5XtEbR6Dg==}
     engines: {node: '>= 0.4'}
 
+  drange@1.1.1:
+    resolution: {integrity: sha512-pYxfDYpued//QpnLIm4Avk7rsNtAtQkUES2cwAYSvD/wd2pKD71gN2Ebj3e7klzXwjocvE8c5vx/1fxwpqmSxA==}
+    engines: {node: '>=4'}
+
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
     engines: {node: '>= 0.4'}
@@ -1420,9 +1474,17 @@ packages:
   quick-format-unescaped@4.0.4:
     resolution: {integrity: sha512-tYC1Q1hgyRuHgloV/YXs2w15unPVh8qfu/qCTfhTYamaw7fyhumKa2yGpdSo87vY32rIclj+4fWYQXUMs9EHvg==}
 
+  randexp@0.5.3:
+    resolution: {integrity: sha512-U+5l2KrcMNOUPYvazA3h5ekF80FHTUG+87SEAmHZmolh1M+i/WyTCxVzmi+tidIa1tM4BSe8g2Y/D3loWDjj+w==}
+    engines: {node: '>=4'}
+
   real-require@0.2.0:
     resolution: {integrity: sha512-57frrGM/OCTLqLOAh0mhVA9VBMHd+9U7Zb2THMGdBUoZVOtGbJzjxsYGDJ3A9AYYCP4hn6y1TVbaOfzWtm5GFg==}
     engines: {node: '>= 12.13.0'}
+
+  ret@0.2.2:
+    resolution: {integrity: sha512-M0b3YWQs7R3Z917WRQy1HHA7Ba7D8hvZg6UE5mLykJxQVE2ju0IXbGlaHPPlkY+WN7wFP+wUMXmBFA0aV6vYGQ==}
+    engines: {node: '>=4'}
 
   rollup@4.60.0:
     resolution: {integrity: sha512-yqjxruMGBQJ2gG4HtjZtAfXArHomazDHoFwFFmZZl0r7Pdo7qCIXKqKHZc8yeoMgzJJ+pO6pEEHa+V7uzWlrAQ==}
@@ -1602,6 +1664,10 @@ packages:
   util@0.12.5:
     resolution: {integrity: sha512-kZf/K6hEIrWHI6XqOFUiiMa+79wE/D8Q+NCNAWclkyg3b4d2k7s0QGepNjiABc+aR3N1PAyHL7p6UcLY6LmrnA==}
 
+  uuid@8.3.2:
+    resolution: {integrity: sha512-+NYs2QeMWy+GWFOEm9xnn6HCDp0l7QBD7ml8zLUmJ+93Q5NF0NocErnwkTkXVFNiX3/fpC6afS8Dhb/gz7R7eg==}
+    hasBin: true
+
   vite-node@3.2.4:
     resolution: {integrity: sha512-EbKSKh+bh1E1IFxeO0pg1n4dvoOTt0UDiXMd/qn++r98+jPO1xtJilvXldeuQ8giIB5IkpjCgMleHMNEsGH6pg==}
     engines: {node: ^18.0.0 || ^20.0.0 || >=22.0.0}
@@ -1700,8 +1766,37 @@ packages:
   wrappy@1.0.2:
     resolution: {integrity: sha512-l4Sp/DRseor9wL6EvV2+TuQn63dMkPjZ/sp9XkghTEbV9KlPS1xUsZ3u7/IQO4wxtcFB4bgpQPRcR3QCvezPcQ==}
 
+  zocker@3.0.0:
+    resolution: {integrity: sha512-xSJz2M9AELZKzgpuuZPbTQdMv9263p/zSHDIj81B58X3334Xl6iJ/C3u6OQiOlsrWAoJSJsveBcIdz1eEPL0EA==}
+    peerDependencies:
+      zod: ^3.25.0 || ^4.0.0
+
+  zod-fixture@2.5.2:
+    resolution: {integrity: sha512-JipX1OVrKA3QSdx/k29sK9zocFM8mvdFHu8Wt0htrJ5ZlE8vcmnNfT9iKXMjjc3Hqy8btWtPyP4e03D0IxpVxg==}
+    peerDependencies:
+      zod: '>=3.0.0'
+
+  zod-mocking@0.2.1:
+    resolution: {integrity: sha512-xpmAdGF9AMhXU/2RXzdr5mtx+p+ERb9MF8Qt9f6l74Rc79Heuw6RhAZPwX+SDQtwIyoByh32YNybavbueUXDdA==}
+
+  zod-schema-faker@2.1.1:
+    resolution: {integrity: sha512-KQ+MvSXLk8cZcdUgEHXwszK2fqDZgiCz+apHmXBEgTWUL1WbmiDKmgKIZCUf29OMYCN8eX3DPrrrnKDQ1IMWYQ==}
+    engines: {node: '>=20'}
+    peerDependencies:
+      '@faker-js/faker': ^10.0.0
+      randexp: ^0.5.3
+      zod: ^3.25.0 || ^4.0.0
+
+  zod@3.25.76:
+    resolution: {integrity: sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ==}
+
   zod@4.3.6:
     resolution: {integrity: sha512-rftlrkhHZOcjDwkGlnUtZZkvaPHCsDATp4pGpuOOMDaTdDDXF91wuVDJoWoPsKX/3YPQ5fHuF3STjcYyKr+Qhg==}
+
+  zodock@0.1.0:
+    resolution: {integrity: sha512-EbpysRTYM5CMlPjKqjQPiEt5jVgoVYoMT8QE7gcIkNqrJ1khV/kscWfTWAHEECmvQGZrXoGIQItcMpC+UD779A==}
+    peerDependencies:
+      zod: '>=3.0.0'
 
 snapshots:
 
@@ -1863,6 +1958,8 @@ snapshots:
 
   '@esbuild/win32-x64@0.27.4':
     optional: true
+
+  '@faker-js/faker@10.4.0': {}
 
   '@faker-js/faker@9.9.0': {}
 
@@ -2351,6 +2448,8 @@ snapshots:
       has-property-descriptors: 1.0.2
       object-keys: 1.1.1
 
+  drange@1.1.1: {}
+
   dunder-proto@1.0.1:
     dependencies:
       call-bind-apply-helpers: 1.0.2
@@ -2795,7 +2894,14 @@ snapshots:
 
   quick-format-unescaped@4.0.4: {}
 
+  randexp@0.5.3:
+    dependencies:
+      drange: 1.1.1
+      ret: 0.2.2
+
   real-require@0.2.0: {}
+
+  ret@0.2.2: {}
 
   rollup@4.60.0:
     dependencies:
@@ -3022,6 +3128,8 @@ snapshots:
       is-typed-array: 1.1.15
       which-typed-array: 1.1.20
 
+  uuid@8.3.2: {}
+
   vite-node@3.2.4(@types/node@22.19.15):
     dependencies:
       cac: 6.7.14
@@ -3129,4 +3237,32 @@ snapshots:
 
   wrappy@1.0.2: {}
 
+  zocker@3.0.0(zod@4.3.6):
+    dependencies:
+      '@faker-js/faker': 10.4.0
+      randexp: 0.5.3
+      zod: 4.3.6
+
+  zod-fixture@2.5.2(zod@4.3.6):
+    dependencies:
+      randexp: 0.5.3
+      zod: 4.3.6
+
+  zod-mocking@0.2.1:
+    dependencies:
+      uuid: 8.3.2
+      zod: 3.25.76
+
+  zod-schema-faker@2.1.1(@faker-js/faker@9.9.0)(randexp@0.5.3)(zod@4.3.6):
+    dependencies:
+      '@faker-js/faker': 9.9.0
+      randexp: 0.5.3
+      zod: 4.3.6
+
+  zod@3.25.76: {}
+
   zod@4.3.6: {}
+
+  zodock@0.1.0(zod@4.3.6):
+    dependencies:
+      zod: 4.3.6
