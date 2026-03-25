@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { base, en, faker } from '@faker-js/faker';
 import { describe, expect, it, vi } from 'vitest';
 import { z } from 'zod/v4';
 import { createCheckSet, createContext } from './context.js';
@@ -6,6 +6,9 @@ import type { GeneratorConfig } from './types.js';
 
 const defaultConfig = {
   seed: undefined,
+  maxDepth: 3,
+  locale: [en, base],
+  semanticFieldDetection: false,
   overrides: [],
   generators: {},
 } satisfies GeneratorConfig;

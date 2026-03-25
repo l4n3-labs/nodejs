@@ -3,14 +3,17 @@ import type { GenContext } from '../types.js';
 
 export const generateMap = <T>(ctx: GenContext<T, 'map'>): Map<unknown, unknown> => {
   const { def, checks, faker } = ctx;
+  const atDepthLimit = ctx.depth >= ctx.config.maxDepth;
 
   const minCheck = checks.find('min_size');
   const maxCheck = checks.find('max_size');
 
-  const count = faker.number.int({
-    min: minCheck ? minCheck.minimum : 1,
-    max: maxCheck ? maxCheck.maximum : 3,
-  });
+  const count = atDepthLimit
+    ? 0
+    : faker.number.int({
+        min: minCheck ? minCheck.minimum : 1,
+        max: maxCheck ? maxCheck.maximum : 3,
+      });
 
   const entries = Array.from(
     { length: count },

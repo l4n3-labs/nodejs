@@ -1,5 +1,6 @@
 import type { z } from 'zod/v4';
 import type { GenContext } from '../types.js';
+import { findSemanticString } from './semantic.js';
 
 // In Zod v4, startsWith/endsWith/includes are all string_format checks.
 // Shorthand schemas like z.email() put format directly on the def instead of in checks[].
@@ -61,8 +62,45 @@ export const generateString = <T = string>(ctx: GenContext<T, 'string'>): string
         return faker.date.recent().toISOString().split('T')[0] ?? '';
       case 'time':
         return faker.date.recent().toISOString().split('T')[1]?.replace('Z', '') ?? '';
+      case 'cidrv4':
+        return `${faker.internet.ipv4()}/${faker.number.int({ min: 0, max: 32 })}`;
+      case 'cidrv6':
+        return `${faker.internet.ipv6()}/${faker.number.int({ min: 0, max: 128 })}`;
+      case 'duration':
+        return `P${faker.number.int({ min: 1, max: 30 })}DT${faker.number.int({ min: 0, max: 23 })}H${faker.number.int({ min: 0, max: 59 })}M${faker.number.int({ min: 0, max: 59 })}S`;
+      case 'jwt': {
+        const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).replace(/=/g, '');
+        const payload = btoa(JSON.stringify({ sub: faker.string.uuid(), iat: Math.floor(Date.now() / 1000) })).replace(
+          /=/g,
+          '',
+        );
+        const signature = faker.string.alphanumeric(43);
+        return `${header}.${payload}.${signature}`;
+      }
+      case 'e164':
+        return `+${faker.string.numeric({ length: { min: 8, max: 15 } })}`;
+      case 'hex':
+        return faker.string.hexadecimal({ length: 16, casing: 'lower' }).slice(2);
+      case 'hostname':
+        return faker.internet.domainName();
+      case 'ksuid':
+        return faker.string.alphanumeric(27);
+      case 'xid':
+        return faker.string.alphanumeric(20).toLowerCase();
+      case 'regex':
+        return `^[a-z]{${faker.number.int({ min: 1, max: 10 })}}$`;
       default:
         break;
+    }
+  }
+
+  // Semantic field name detection (only when no format checks and no length constraints)
+  const hasLengthConstraints = checks.has('min_length') || checks.has('max_length') || checks.has('length_equals');
+  if (ctx.config.semanticFieldDetection && formats.length === 0 && !hasLengthConstraints) {
+    const fieldName = ctx.path.at(-1);
+    if (fieldName) {
+      const semanticGen = findSemanticString(fieldName);
+      if (semanticGen) return semanticGen(faker);
     }
   }
 

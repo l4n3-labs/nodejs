@@ -2,6 +2,7 @@ import { base, en, Faker } from '@faker-js/faker';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod/v4';
 import { createContext } from '../context.js';
+import { fixture } from '../fixture.js';
 import { schemaDef } from '../schema-def.js';
 import type { GenContext, GeneratorConfig, ZodDefType } from '../types.js';
 import { generateLazy, generatePipe, generatePromise } from './recursive.js';
@@ -12,7 +13,14 @@ const createTestFaker = (seed?: number): Faker => {
   return f;
 };
 
-const testConfig: GeneratorConfig = { seed: undefined, overrides: [], generators: {} };
+const testConfig: GeneratorConfig = {
+  seed: undefined,
+  maxDepth: 3,
+  locale: [en, base],
+  semanticFieldDetection: false,
+  overrides: [],
+  generators: {},
+};
 
 const createRecursiveCtx = <D extends ZodDefType>(
   schema: z.ZodType,
@@ -59,13 +67,13 @@ describe('generateLazy', () => {
     expect(result).toBe('lazy-value');
   });
 
-  it('returns undefined at depth >= 3', () => {
+  it('always resolves inner schema regardless of depth (depth limiting is in collections)', () => {
     const schema = z.lazy(() => z.literal('deep'));
     const faker = createTestFaker(10);
     const dispatch = makeDispatch(faker);
     const ctx = createRecursiveCtx<'lazy'>(schema, dispatch, faker, 3);
     const result = generateLazy(ctx);
-    expect(result).toBeUndefined();
+    expect(result).toBe('deep');
   });
 
   it('still generates at depth 2 (below cutoff)', () => {
@@ -77,13 +85,23 @@ describe('generateLazy', () => {
     expect(result).toBe('still-ok');
   });
 
-  it('depth exactly 4 also returns undefined', () => {
+  it('resolves inner schema at depth 4+', () => {
     const schema = z.lazy(() => z.literal('deep'));
     const faker = createTestFaker(12);
     const dispatch = makeDispatch(faker);
     const ctx = createRecursiveCtx<'lazy'>(schema, dispatch, faker, 4);
     const result = generateLazy(ctx);
-    expect(result).toBeUndefined();
+    expect(result).toBe('deep');
+  });
+
+  it('recursive tree schema produces valid output that passes safeParse', () => {
+    type TreeNode = { readonly value: string; readonly children: ReadonlyArray<TreeNode> };
+    const treeSchema: z.ZodType<TreeNode> = z.object({
+      value: z.string(),
+      children: z.array(z.lazy(() => treeSchema)),
+    });
+    const result = fixture(treeSchema, { seed: 42 }).one();
+    expect(treeSchema.safeParse(result).success).toBe(true);
   });
 });
 

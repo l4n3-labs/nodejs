@@ -12,7 +12,14 @@ const createTestFaker = (seed?: number): Faker => {
   return f;
 };
 
-const testConfig: GeneratorConfig = { seed: undefined, overrides: [], generators: {} };
+const testConfig: GeneratorConfig = {
+  seed: undefined,
+  maxDepth: 3,
+  locale: [en, base],
+  semanticFieldDetection: false,
+  overrides: [],
+  generators: {},
+};
 
 const createRecursiveCtx = <D extends ZodDefType>(
   schema: z.ZodType,

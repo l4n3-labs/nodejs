@@ -1,5 +1,6 @@
 import type { z } from 'zod/v4';
 import type { GenContext } from '../types.js';
+import { findSemanticNumber } from './semantic.js';
 
 const DEFAULT_MIN = -1_000_000;
 const DEFAULT_MAX = 1_000_000;
@@ -20,6 +21,15 @@ const resolveMax = (ltCheck: z.core.$ZodCheckLessThanDef | undefined, isInt: boo
 
 export const generateNumber = <T = number>(ctx: GenContext<T, 'number'>): number => {
   const { faker, checks } = ctx;
+
+  // Semantic field name detection (only when no explicit range constraints)
+  if (ctx.config.semanticFieldDetection) {
+    const fieldName = ctx.path.at(-1);
+    if (fieldName && !checks.has('greater_than') && !checks.has('less_than')) {
+      const semanticGen = findSemanticNumber(fieldName);
+      if (semanticGen) return semanticGen(faker);
+    }
+  }
 
   const gtCheck = checks.find('greater_than');
   const ltCheck = checks.find('less_than');

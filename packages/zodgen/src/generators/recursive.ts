@@ -2,7 +2,6 @@ import type { z } from 'zod/v4';
 import type { GenContext } from '../types.js';
 
 export const generateLazy = <T>(ctx: GenContext<T, 'lazy'>): unknown => {
-  if (ctx.depth >= 3) return undefined;
   const innerSchema = ctx.def.getter();
   return ctx.generate(innerSchema as z.ZodType);
 };

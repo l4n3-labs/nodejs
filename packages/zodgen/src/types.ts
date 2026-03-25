@@ -1,10 +1,13 @@
-import type { Faker } from '@faker-js/faker';
+import type { Faker, LocaleDefinition } from '@faker-js/faker';
 import type { z } from 'zod/v4';
 
 // --- Config ---
 
 export type GeneratorConfig = {
   readonly seed: number | undefined;
+  readonly maxDepth: number;
+  readonly locale: ReadonlyArray<LocaleDefinition>;
+  readonly semanticFieldDetection: boolean;
   // biome-ignore lint/suspicious/noExplicitAny: overrides handle heterogeneous schema types at runtime
   readonly overrides: ReadonlyArray<Override<any>>;
   readonly generators: Partial<Readonly<{ [D in ZodDefType]: Generator<D> }>>;
@@ -161,9 +164,16 @@ export type FixtureGenerator<T> = {
       ) => FixtureGenerator<T>
     : never;
   readonly generator: <D extends ZodDefType>(defType: D, gen: Generator<D>) => FixtureGenerator<T>;
+  readonly maxDepth: (depth: number) => FixtureGenerator<T>;
+  readonly locale: (locale: ReadonlyArray<LocaleDefinition>) => FixtureGenerator<T>;
+  readonly invalid: () => unknown;
+  readonly invalidMany: (count: number) => ReadonlyArray<unknown>;
 };
 
 export type FixtureOptions = {
   readonly seed?: number;
+  readonly maxDepth?: number;
+  readonly locale?: ReadonlyArray<LocaleDefinition>;
+  readonly semanticFieldDetection?: boolean;
   readonly generators?: GeneratorConfig['generators'];
 };

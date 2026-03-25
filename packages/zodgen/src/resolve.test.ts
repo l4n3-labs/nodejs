@@ -1,4 +1,4 @@
-import { faker } from '@faker-js/faker';
+import { base, en, faker } from '@faker-js/faker';
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod/v4';
 import { resolve } from './resolve.js';
@@ -6,6 +6,9 @@ import type { GenContext, GeneratorConfig } from './types.js';
 
 const makeConfig = (overrides: GeneratorConfig['overrides'] = []): GeneratorConfig => ({
   seed: undefined,
+  maxDepth: 3,
+  locale: [en, base],
+  semanticFieldDetection: false,
   overrides,
   generators: {},
 });

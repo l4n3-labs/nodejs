@@ -1,3 +1,4 @@
+export type { LocaleDefinition } from '@faker-js/faker';
 export { fixture } from './fixture.js';
 export type {
   CheckSet,

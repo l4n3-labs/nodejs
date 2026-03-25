@@ -1,27 +1,33 @@
-import { base, en, Faker } from '@faker-js/faker';
+import { Faker, type LocaleDefinition } from '@faker-js/faker';
 import type { z } from 'zod/v4';
 import { defaultConfig } from './config.js';
+import { generateInvalid } from './generators/invalid.js';
 import { resolve } from './resolve.js';
 import type { FixtureGenerator, FixtureOptions, Generator, GeneratorConfig, ManyOptions, ZodDefType } from './types.js';
 
-const fakerCache = new Map<number, Faker>();
+const fakerCache = new Map<number, Map<LocaleDefinition, Faker>>();
 
-const createSeededFaker = (seed: number): Faker => {
-  const cached = fakerCache.get(seed);
+const createSeededFaker = (seed: number, locale: ReadonlyArray<LocaleDefinition>): Faker => {
+  const primary = locale[0];
+  const seedMap = fakerCache.get(seed) ?? new Map<LocaleDefinition, Faker>();
+  const cached = primary ? seedMap.get(primary) : undefined;
   if (cached) {
     cached.seed(seed);
     return cached;
   }
-  const f = new Faker({ locale: [en, base] });
+  const f = new Faker({ locale: [...locale] });
   f.seed(seed);
-  fakerCache.set(seed, f);
+  if (primary) {
+    seedMap.set(primary, f);
+    fakerCache.set(seed, seedMap);
+  }
   return f;
 };
 
-const createUnseededFaker = (): Faker => new Faker({ locale: [en, base] });
+const createUnseededFaker = (locale: ReadonlyArray<LocaleDefinition>): Faker => new Faker({ locale: [...locale] });
 
-const createFaker = (seed: number | undefined): Faker =>
-  seed !== undefined ? createSeededFaker(seed) : createUnseededFaker();
+const createFaker = (seed: number | undefined, locale: ReadonlyArray<LocaleDefinition>): Faker =>
+  seed !== undefined ? createSeededFaker(seed, locale) : createUnseededFaker(locale);
 
 const generateOne = <T>(schema: z.ZodType<T>, config: GeneratorConfig, faker: Faker): T =>
   resolve(schema, config, [], 0, faker);
@@ -67,11 +73,11 @@ const generateMany = <T>(
 
 const createGenerator = <T>(schema: z.ZodType<T>, config: GeneratorConfig): FixtureGenerator<T> => ({
   one: (): T => {
-    const f = createFaker(config.seed);
+    const f = createFaker(config.seed, config.locale);
     return generateOne(schema, config, f);
   },
   many: (count: number, options?: ManyOptions<T>): ReadonlyArray<T> => {
-    const f = createFaker(config.seed);
+    const f = createFaker(config.seed, config.locale);
     return generateMany(schema, count, config, f, options?.unique as ReadonlyArray<string> | undefined);
   },
   seed: (seed: number): FixtureGenerator<T> => createGenerator(schema, { ...config, seed }),
@@ -100,11 +106,25 @@ const createGenerator = <T>(schema: z.ZodType<T>, config: GeneratorConfig): Fixt
       ...config,
       generators: { ...config.generators, [defType]: gen },
     }),
+  maxDepth: (depth: number): FixtureGenerator<T> => createGenerator(schema, { ...config, maxDepth: depth }),
+  locale: (locale: ReadonlyArray<LocaleDefinition>): FixtureGenerator<T> =>
+    createGenerator(schema, { ...config, locale }),
+  invalid: (): unknown => {
+    const f = createFaker(config.seed, config.locale);
+    return generateInvalid(schema, config, f);
+  },
+  invalidMany: (count: number): ReadonlyArray<unknown> => {
+    const f = createFaker(config.seed, config.locale);
+    return Array.from({ length: count }, () => generateInvalid(schema, config, f));
+  },
 });
 
 const configFromOptions = (opts?: FixtureOptions): GeneratorConfig => ({
   ...defaultConfig,
   seed: opts?.seed,
+  maxDepth: opts?.maxDepth ?? defaultConfig.maxDepth,
+  locale: opts?.locale ?? defaultConfig.locale,
+  semanticFieldDetection: opts?.semanticFieldDetection ?? defaultConfig.semanticFieldDetection,
   generators: { ...defaultConfig.generators, ...opts?.generators },
 });
 
