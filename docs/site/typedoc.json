@@ -8,6 +8,16 @@
   "hidePageHeader": true,
   "hideBreadcrumbs": true,
   "hidePageTitle": false,
-  "entryFileName": "index",
-  "readme": "none"
+  "entryFileName": "overview",
+  "readme": "none",
+  "disableSources": true,
+  "intentionallyNotExported": [
+    "ObjectOverride",
+    "PredicateOverride",
+    "DotPaths",
+    "CheckDefMap",
+    "PartialOverrideGenerators",
+    "UnwrapArray",
+    "ObjectValueKeys"
+  ]
 }

@@ -20,7 +20,7 @@ const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   return (
     <html lang="en" dir="ltr" suppressHydrationWarning>
       <Head />
-      <body>
+      <body suppressHydrationWarning>
         <Layout
           navbar={navbar}
           pageMap={pageMap}
