@@ -3,7 +3,7 @@ import { z } from 'zod';
 
 // Union types — picks one option randomly
 
-const stringOrNumber = fixture(z.union([z.string(), z.number()]));
+const stringOrNumber = fixture(z.union([z.string(), z.number()])).one();
 console.log('string | number:', stringOrNumber);
 
 const shape = fixture(
@@ -11,29 +11,29 @@ const shape = fixture(
     z.object({ type: z.literal('circle'), radius: z.number().positive() }),
     z.object({ type: z.literal('rect'), width: z.number().positive(), height: z.number().positive() }),
   ]),
-);
+).one();
 console.log('shape:', shape);
 
 // Intersection — merges object properties
 
 const withTimestamps = z.object({ createdAt: z.date(), updatedAt: z.date() });
 const withName = z.object({ name: z.string() });
-const timestamped = fixture(z.intersection(withTimestamps, withName));
+const timestamped = fixture(z.intersection(withTimestamps, withName)).one();
 console.log('intersection:', timestamped);
 
 // Nullable — ~80% value, ~20% null
 
-const nullableName = fixture(z.string().nullable());
+const nullableName = fixture(z.string().nullable()).one();
 console.log('nullable string:', nullableName);
 
 // Optional — ~80% value, ~20% undefined
 
-const optionalAge = fixture(z.number().optional());
+const optionalAge = fixture(z.number().optional()).one();
 console.log('optional number:', optionalAge);
 
 // Default — generates the inner value (ignores default)
 
-const withDefault = fixture(z.string().default('fallback'));
+const withDefault = fixture(z.string().default('fallback')).one();
 console.log('with default:', withDefault);
 
 // Readonly — freezes the generated object
@@ -45,6 +45,6 @@ const readonlyUser = fixture(
       name: z.string(),
     })
     .readonly(),
-);
+).one();
 console.log('readonly user:', readonlyUser);
 console.log('is frozen:', Object.isFrozen(readonlyUser));

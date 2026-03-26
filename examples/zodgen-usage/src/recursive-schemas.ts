@@ -15,7 +15,7 @@ const treeSchema: z.ZodType<TreeNode> = z.object({
   children: z.array(z.lazy(() => treeSchema)),
 });
 
-const tree = fixture(treeSchema);
+const tree = fixture(treeSchema).one();
 console.log('tree:', JSON.stringify(tree, null, 2));
 
 // Linked list
@@ -30,7 +30,7 @@ const listSchema: z.ZodType<ListNode> = z.object({
   next: z.lazy(() => listSchema).nullable(),
 });
 
-const list = fixture(listSchema);
+const list = fixture(listSchema).one();
 console.log('linked list:', JSON.stringify(list, null, 2));
 
 // Comment thread (nested replies)
@@ -47,5 +47,5 @@ const commentSchema: z.ZodType<Comment> = z.object({
   replies: z.array(z.lazy(() => commentSchema)),
 });
 
-const thread = fixture(commentSchema);
+const thread = fixture(commentSchema).one();
 console.log('comment thread:', JSON.stringify(thread, null, 2));

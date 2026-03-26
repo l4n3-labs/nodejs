@@ -158,6 +158,29 @@ const createZodGenerator = <T>(schema: z.ZodType<T>, config: GeneratorConfig): Z
   };
 };
 
+/**
+ * Creates a {@link ZodFixtureGenerator} from a Zod schema. This is the main entry point
+ * for the `@l4n3/zodgen` package. Also available as `fixture.create()`.
+ *
+ * @param schema - The Zod schema to generate fixture data for.
+ * @param opts - Optional configuration (seed, locale, rates, etc.).
+ * @returns A chainable generator with `.one()`, `.many()`, and configuration methods.
+ *
+ * @example
+ * ```ts
+ * import { fixture } from '@l4n3/zodgen';
+ * import { z } from 'zod';
+ *
+ * const userSchema = z.object({
+ *   name: z.string(),
+ *   email: z.email(),
+ *   age: z.number().int().min(18).max(99),
+ * });
+ *
+ * const user = fixture(userSchema).one();
+ * const users = fixture(userSchema, { seed: 42 }).many(10);
+ * ```
+ */
 export const fixture = Object.assign(
   <T>(schema: z.ZodType<T>, opts?: FixtureOptions): ZodFixtureGenerator<T> =>
     createZodGenerator(schema, configFromOptions(opts)),

@@ -36,7 +36,12 @@ type DotPaths<T, Prefix extends string = ''> =
       }[keyof T & string]
     : never;
 
+/**
+ * Options for batch generation via `.many()`.
+ * Specify `unique` with dot-path field names to enforce uniqueness across generated items.
+ */
 export type ManyOptions<T> = {
+  /** Dot-paths to fields that must be unique across all generated items (e.g. `['id', 'user.email']`). */
   readonly unique?: ReadonlyArray<DotPaths<T>>;
 };
 
@@ -50,6 +55,14 @@ type PredicateOverride<T> = (
   generate: (ctx: GenContext) => unknown,
 ) => ZodFixtureGenerator<T>;
 
+/**
+ * The main user-facing API for generating fixture data from Zod schemas.
+ * Extends the base {@link FixtureGenerator} with Zod-specific methods:
+ * `.for()` to switch schemas, `.invalid()` and `.invalidMany()` for negative testing.
+ * All configuration methods return a new generator instance (immutable builder).
+ *
+ * @typeParam T - The type of values this generator produces, inferred from the Zod schema.
+ */
 export type ZodFixtureGenerator<T> = Omit<
   FixtureGenerator<T>,
   | 'seed'
@@ -94,16 +107,25 @@ export type ZodFixtureGenerator<T> = Omit<
   readonly invalidMany: (count: number) => ReadonlyArray<unknown>;
 };
 
+/** Configuration options for the {@link fixture} entry point. */
 export type FixtureOptions = {
+  /** Random seed for reproducible output. */
   readonly seed?: number;
+  /** Maximum recursion depth for lazy/recursive schemas. Default: 10. */
   readonly maxDepth?: number;
+  /** Faker.js locale definitions for localized data generation. */
   readonly locale?: ReadonlyArray<LocaleDefinition>;
+  /** Enable field-name-based semantic value generation (e.g. "email" produces emails). Default: `true`. */
   readonly semanticFieldDetection?: boolean;
+  /** Probability (0-1) that optional fields are present. Default: 0.8. */
   readonly optionalRate?: number;
+  /** Probability (0-1) that nullable fields are null. Default: 0.2. */
   readonly nullRate?: number;
+  /** Derived field computations applied after base generation. */
   readonly derivations?: ReadonlyArray<{
     readonly key: string;
     readonly compute: (obj: Record<string, unknown>) => unknown;
   }>;
+  /** Custom generators keyed by node type, replacing the built-in defaults. */
   readonly generators?: Partial<Readonly<Record<NodeType, Generator>>>;
 };

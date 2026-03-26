@@ -116,6 +116,15 @@ const extractSizeConstraints = (schema: z.ZodType): SizeConstraints => {
 // biome-ignore lint/suspicious/noExplicitAny: Zod v4 internals require bypassing the public type surface
 const getDef = (schema: z.ZodType): any => (schema as any)._zod.def;
 
+/**
+ * Converts a Zod schema to a {@link SchemaNode}, the internal representation
+ * used by the generation engine. Recursively walks the Zod schema tree,
+ * extracting constraints and structure.
+ *
+ * @param schema - Any Zod schema type (primitives, objects, arrays, unions, etc.).
+ * @returns The equivalent `SchemaNode` tree.
+ * @throws If the schema contains an unsupported Zod type.
+ */
 export const toNode = (schema: z.ZodType): SchemaNode => {
   const def = getDef(schema);
   const type: string = def.type;
