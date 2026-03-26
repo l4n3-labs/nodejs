@@ -1,47 +1,46 @@
 import type { Faker } from '@faker-js/faker';
+import type { GeneratorConfig } from '@l4n3/gen-core';
+import { resolve } from '@l4n3/gen-core/resolve';
 import type { z } from 'zod/v4';
-import { createCheckSet } from '../context.js';
-import { resolve } from '../resolve.js';
-import type { GeneratorConfig } from '../types.js';
+import { toNode } from '../adapter.js';
 
-const extractChecks = (schema: z.ZodType): ReadonlyArray<z.core.$ZodCheck> =>
-  ((schema as z.ZodType).def.checks ?? []) as ReadonlyArray<z.core.$ZodCheck>;
+type ZodCheckDef = z.core.$ZodCheckDef;
+
+const extractCheckDefs = (schema: z.ZodType): ReadonlyArray<ZodCheckDef> =>
+  ((schema.def.checks ?? []) as ReadonlyArray<z.core.$ZodCheck>).map((c) => c._zod.def);
+
+const findCheck = <T extends ZodCheckDef>(checks: ReadonlyArray<ZodCheckDef>, name: string): T | undefined =>
+  checks.find((c) => c.check === name) as T | undefined;
 
 const pickRandom = <T>(faker: Faker, items: ReadonlyArray<T>): T =>
   items[faker.number.int({ min: 0, max: items.length - 1 })] as T;
 
 const invalidateString = (schema: z.ZodType, faker: Faker): unknown => {
-  const checks = createCheckSet(extractChecks(schema));
+  const checks = extractCheckDefs(schema);
+  const hasMin = checks.some((c) => c.check === 'min_length');
+  const hasMax = checks.some((c) => c.check === 'max_length');
+  const hasFormat = checks.some((c) => c.check === 'string_format');
+
   const strategies: ReadonlyArray<() => unknown> = [
     () => faker.number.int(),
-    ...(checks.has('min_length') ? [() => ''] : []),
-    ...(checks.has('max_length') ? [() => faker.string.alpha(1000)] : []),
-    ...(checks.has('string_format') ? [() => `not-a-valid-format-${faker.string.alpha(5)}`] : []),
+    ...(hasMin ? [() => ''] : []),
+    ...(hasMax ? [() => faker.string.alpha(1000)] : []),
+    ...(hasFormat ? [() => `not-a-valid-format-${faker.string.alpha(5)}`] : []),
   ];
   return pickRandom(faker, strategies)();
 };
 
 const invalidateNumber = (schema: z.ZodType, faker: Faker): unknown => {
-  const checks = createCheckSet(extractChecks(schema));
+  const checks = extractCheckDefs(schema);
+  const gtCheck = findCheck<z.core.$ZodCheckGreaterThanDef>(checks, 'greater_than');
+  const ltCheck = findCheck<z.core.$ZodCheckLessThanDef>(checks, 'less_than');
+  const hasFormat = checks.some((c) => c.check === 'number_format');
+
   const strategies: ReadonlyArray<() => unknown> = [
     () => faker.string.alpha(5),
-    ...(checks.has('greater_than')
-      ? [
-          () => {
-            const gt = checks.find('greater_than');
-            return gt ? Number(gt.value) - 1000 : -Infinity;
-          },
-        ]
-      : []),
-    ...(checks.has('less_than')
-      ? [
-          () => {
-            const lt = checks.find('less_than');
-            return lt ? Number(lt.value) + 1000 : Infinity;
-          },
-        ]
-      : []),
-    ...(checks.has('number_format') ? [() => faker.number.float({ min: 0.01, max: 0.99, fractionDigits: 2 })] : []),
+    ...(gtCheck ? [() => Number(gtCheck.value) - 1000] : []),
+    ...(ltCheck ? [() => Number(ltCheck.value) + 1000] : []),
+    ...(hasFormat ? [() => faker.number.float({ min: 0.01, max: 0.99, fractionDigits: 2 })] : []),
   ];
   return pickRandom(faker, strategies)();
 };
@@ -55,8 +54,9 @@ const invalidateObject = (schema: z.ZodType, config: GeneratorConfig, faker: Fak
   const keys = Object.keys(shape);
   if (keys.length === 0) return faker.string.alpha(5);
 
-  // Generate a valid object, then corrupt one random field
-  const valid = resolve(schema, config, [], 0, faker) as Record<string, unknown>;
+  // Generate a valid object via gen-core, then corrupt one random field
+  const node = toNode(schema);
+  const valid = resolve(node, config, [], 0, faker) as Record<string, unknown>;
   const targetKey = pickRandom(faker, keys);
   const targetSchema = shape[targetKey];
   if (!targetSchema) return valid;
@@ -85,10 +85,12 @@ const invalidateLiteral = (schema: z.ZodType, faker: Faker): unknown => {
 };
 
 const invalidateArray = (schema: z.ZodType, faker: Faker): unknown => {
-  const checks = createCheckSet(extractChecks(schema));
-  if (checks.has('min_length')) return [];
-  if (checks.has('max_length')) {
-    const maxCheck = checks.find('max_length');
+  const checks = extractCheckDefs(schema);
+  const hasMin = checks.some((c) => c.check === 'min_length');
+  const hasMax = checks.some((c) => c.check === 'max_length');
+  if (hasMin) return [];
+  if (hasMax) {
+    const maxCheck = findCheck<z.core.$ZodCheckMaxLengthDef>(checks, 'max_length');
     const max = maxCheck ? maxCheck.maximum : 10;
     return Array.from({ length: max + 10 }, () => faker.string.alpha(3));
   }

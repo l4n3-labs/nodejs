@@ -7,6 +7,18 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./resolve": {
+      "types": "./dist/resolve.d.ts",
+      "import": "./dist/resolve.js"
+    },
+    "./generators/string": {
+      "types": "./dist/generators/string.d.ts",
+      "import": "./dist/generators/string.js"
+    },
+    "./generators/number": {
+      "types": "./dist/generators/number.d.ts",
+      "import": "./dist/generators/number.js"
     }
   },
   "scripts": {

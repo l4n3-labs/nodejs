@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest';
 import { z } from 'zod/v4';
 import { fixture } from './fixture.js';
-import type { GenContext } from './types.js';
 
 describe('fixture()', () => {
   it('generates a value from a simple schema', () => {
@@ -126,7 +125,9 @@ describe('.override()', () => {
     const schema = z.object({ email: z.string().email(), name: z.string() });
     const result = fixture(schema)
       .override(
-        (ctx) => ctx.checks.has('string_format') && ctx.checks.find('string_format')?.format === 'email',
+        (ctx) =>
+          ctx.node.type === 'string' &&
+          (ctx.node as { constraints: { format?: string } }).constraints.format === 'email',
         () => 'predicate@test.com',
       )
       .one();
@@ -492,8 +493,8 @@ describe('integration: nested schemas', () => {
 });
 
 describe('config generators', () => {
-  const customStringGenerator = <T>(_ctx: GenContext<T, 'string'>): T => 'custom-string' as T;
-  const customNumberGenerator = <T>(_ctx: GenContext<T, 'number'>): T => 999 as T;
+  const customStringGenerator = (): unknown => 'custom-string';
+  const customNumberGenerator = (): unknown => 999;
 
   it('overrides the default generator for a type via .generator()', () => {
     const result = fixture(z.string()).generator('string', customStringGenerator).one();

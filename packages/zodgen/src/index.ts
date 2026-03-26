@@ -1,7 +1,7 @@
 export type { LocaleDefinition } from '@faker-js/faker';
+export { toNode } from './adapter.js';
 export { fixture } from './fixture.js';
 export type {
-  CheckSet,
   Derivation,
   FixtureGenerator,
   FixtureOptions,
@@ -9,10 +9,9 @@ export type {
   Generator,
   GeneratorConfig,
   ManyOptions,
+  NodeType,
   Override,
   OverrideMatcher,
-  ResolvedDef,
-  ZodCheckDef,
-  ZodDefMap,
-  ZodDefType,
+  SchemaNode,
+  ZodFixtureGenerator,
 } from './types.js';

@@ -228,6 +228,10 @@ importers:
         version: 3.2.4(@types/debug@4.1.13)(@types/node@22.19.15)(yaml@2.8.3)
 
   packages/zodgen:
+    dependencies:
+      '@l4n3/gen-core':
+        specifier: workspace:*
+        version: link:../gen-core
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.4.8

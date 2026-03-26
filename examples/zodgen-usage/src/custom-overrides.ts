@@ -25,10 +25,8 @@ console.log('role is admin?', user.role === 'admin');
 // Predicate matcher — match based on schema context
 
 const emailOverrideGen = fixture(userSchema).override(
-  (ctx) => {
-    const formatCheck = ctx.checks.find('string_format');
-    return formatCheck !== undefined && 'format' in formatCheck && formatCheck.format === 'email';
-  },
+  (ctx) =>
+    ctx.node.type === 'string' && (ctx.node as { constraints: { format?: string } }).constraints.format === 'email',
   () => 'predicate@test.com',
 );
 
