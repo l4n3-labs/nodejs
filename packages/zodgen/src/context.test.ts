@@ -9,6 +9,10 @@ const defaultConfig = {
   maxDepth: 3,
   locale: [en, base],
   semanticFieldDetection: false,
+  optionalRate: 0.8,
+  nullRate: 0.2,
+  derivations: [],
+  traits: {},
   overrides: [],
   generators: {},
 } satisfies GeneratorConfig;

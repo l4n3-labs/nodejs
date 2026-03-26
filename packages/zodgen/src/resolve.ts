@@ -37,9 +37,10 @@ export const resolve = <T>(
   path: ReadonlyArray<string>,
   depth: number,
   faker: Faker,
+  sequence = 0,
 ): T => {
   const generate = <U>(childSchema: z.ZodType<U>, childKey?: string): U =>
-    resolve(childSchema, config, childKey !== undefined ? [...path, childKey] : path, depth + 1, faker);
+    resolve(childSchema, config, childKey !== undefined ? [...path, childKey] : path, depth + 1, faker, sequence);
 
   const indexed = indexOverrides(config.overrides);
 
@@ -47,13 +48,13 @@ export const resolve = <T>(
   const lastKey = path.at(-1);
   const keyMatch = lastKey !== undefined ? indexed.byKey.get(lastKey) : undefined;
   if (keyMatch) {
-    const ctx = createContext(schema, config, path, depth, faker, generate);
+    const ctx = createContext(schema, config, path, depth, faker, generate, sequence);
     return keyMatch.generate(ctx) as T;
   }
 
   // Only scan predicates (typically few or none)
   if (indexed.predicates.length > 0) {
-    const ctx = createContext(schema, config, path, depth, faker, generate);
+    const ctx = createContext(schema, config, path, depth, faker, generate, sequence);
     const predicateMatch = indexed.predicates.find((o) => (o.matcher as (ctx: GenContext<unknown>) => boolean)(ctx));
     if (predicateMatch) return predicateMatch.generate(ctx) as T;
   }
@@ -64,6 +65,6 @@ export const resolve = <T>(
   if (!generator) throw new Error(`No generator for type: ${defType}`);
 
   // Defer context creation until the generator needs it (most common path)
-  const ctx = createContext(schema, config, path, depth, faker, generate);
+  const ctx = createContext(schema, config, path, depth, faker, generate, sequence);
   return generator(ctx);
 };

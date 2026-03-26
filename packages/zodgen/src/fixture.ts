@@ -29,8 +29,8 @@ const createUnseededFaker = (locale: ReadonlyArray<LocaleDefinition>): Faker => 
 const createFaker = (seed: number | undefined, locale: ReadonlyArray<LocaleDefinition>): Faker =>
   seed !== undefined ? createSeededFaker(seed, locale) : createUnseededFaker(locale);
 
-const generateOne = <T>(schema: z.ZodType<T>, config: GeneratorConfig, faker: Faker): T =>
-  resolve(schema, config, [], 0, faker);
+const generateOne = <T>(schema: z.ZodType<T>, config: GeneratorConfig, faker: Faker, sequence = 0): T =>
+  resolve(schema, config, [], 0, faker, sequence);
 
 const getByDotPath = (obj: unknown, path: string): unknown =>
   path.split('.').reduce<unknown>((acc, key) => (acc as Record<string, unknown>)?.[key], obj);
@@ -43,7 +43,7 @@ const generateMany = <T>(
   uniqueKeys?: ReadonlyArray<string>,
 ): ReadonlyArray<T> => {
   if (!uniqueKeys || uniqueKeys.length === 0) {
-    return Array.from({ length: count }, () => resolve(schema, config, [], 0, faker) as T);
+    return Array.from({ length: count }, (_, i) => resolve(schema, config, [], 0, faker, i) as T);
   }
 
   const maxAttempts = count * 10;
@@ -51,7 +51,7 @@ const generateMany = <T>(
   const results: Array<T> = [];
 
   for (let attempt = 0; attempt < maxAttempts && results.length < count; attempt++) {
-    const item = resolve(schema, config, [], 0, faker) as T;
+    const item = resolve(schema, config, [], 0, faker, results.length) as T;
     const isDuplicate = uniqueKeys.some((key) => seen.get(key)?.has(getByDotPath(item, key)) ?? false);
 
     if (!isDuplicate) {
@@ -109,6 +109,33 @@ const createGenerator = <T>(schema: z.ZodType<T>, config: GeneratorConfig): Fixt
   maxDepth: (depth: number): FixtureGenerator<T> => createGenerator(schema, { ...config, maxDepth: depth }),
   locale: (locale: ReadonlyArray<LocaleDefinition>): FixtureGenerator<T> =>
     createGenerator(schema, { ...config, locale }),
+  optionalRate: (rate: number): FixtureGenerator<T> => createGenerator(schema, { ...config, optionalRate: rate }),
+  nullRate: (rate: number): FixtureGenerator<T> => createGenerator(schema, { ...config, nullRate: rate }),
+  derive: ((key: string, compute: (obj: Record<string, unknown>) => unknown): FixtureGenerator<T> =>
+    createGenerator(schema, {
+      ...config,
+      derivations: [...config.derivations, { key, compute }],
+    })) as FixtureGenerator<T>['derive'],
+  trait: ((name: string, overrides: Record<string, (ctx: unknown) => unknown>): FixtureGenerator<T> =>
+    createGenerator(schema, {
+      ...config,
+      traits: {
+        ...config.traits,
+        [name]: Object.entries(overrides).map(([key, generate]) => ({ matcher: key, generate })),
+      },
+    })) as unknown as FixtureGenerator<T>['trait'],
+  with: (...traitNames: ReadonlyArray<string>): FixtureGenerator<T> => {
+    const traitOverrides = traitNames.flatMap((name) => {
+      const trait = config.traits[name];
+      if (!trait)
+        throw new Error(`Unknown trait: "${name}". Available traits: [${Object.keys(config.traits).join(', ')}]`);
+      return trait;
+    });
+    return createGenerator(schema, {
+      ...config,
+      overrides: [...config.overrides, ...traitOverrides],
+    });
+  },
   invalid: (): unknown => {
     const f = createFaker(config.seed, config.locale);
     return generateInvalid(schema, config, f);
@@ -125,6 +152,9 @@ const configFromOptions = (opts?: FixtureOptions): GeneratorConfig => ({
   maxDepth: opts?.maxDepth ?? defaultConfig.maxDepth,
   locale: opts?.locale ?? defaultConfig.locale,
   semanticFieldDetection: opts?.semanticFieldDetection ?? defaultConfig.semanticFieldDetection,
+  optionalRate: opts?.optionalRate ?? defaultConfig.optionalRate,
+  nullRate: opts?.nullRate ?? defaultConfig.nullRate,
+  derivations: opts?.derivations ?? defaultConfig.derivations,
   generators: { ...defaultConfig.generators, ...opts?.generators },
 });
 

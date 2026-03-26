@@ -6,6 +6,10 @@ export const defaultConfig: GeneratorConfig = {
   maxDepth: 10,
   locale: [en, base],
   semanticFieldDetection: true,
+  optionalRate: 0.8,
+  nullRate: 0.2,
   overrides: [],
+  derivations: [],
+  traits: {},
   generators: {},
 };

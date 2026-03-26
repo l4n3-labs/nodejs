@@ -546,3 +546,178 @@ describe('config generators', () => {
     expect(result).not.toBe('custom-string');
   });
 });
+
+describe('optionalRate / nullRate', () => {
+  it('optionalRate: 1.0 always generates the inner value', () => {
+    const schema = z.object({ name: z.string().optional() });
+    const results = fixture(schema, { seed: 1 }).optionalRate(1.0).many(50);
+    expect(results.every((r) => r.name !== undefined)).toBe(true);
+  });
+
+  it('optionalRate: 0.0 always generates undefined', () => {
+    const schema = z.object({ name: z.string().optional() });
+    const results = fixture(schema, { seed: 1 }).optionalRate(0.0).many(50);
+    expect(results.every((r) => r.name === undefined)).toBe(true);
+  });
+
+  it('nullRate: 1.0 always generates null', () => {
+    const schema = z.object({ name: z.string().nullable() });
+    const results = fixture(schema, { seed: 1 }).nullRate(1.0).many(50);
+    expect(results.every((r) => r.name === null)).toBe(true);
+  });
+
+  it('nullRate: 0.0 never generates null', () => {
+    const schema = z.object({ name: z.string().nullable() });
+    const results = fixture(schema, { seed: 1 }).nullRate(0.0).many(50);
+    expect(results.every((r) => r.name !== null)).toBe(true);
+  });
+
+  it('accepts optionalRate via FixtureOptions', () => {
+    const schema = z.object({ name: z.string().optional() });
+    const results = fixture(schema, { seed: 1, optionalRate: 1.0 }).many(20);
+    expect(results.every((r) => r.name !== undefined)).toBe(true);
+  });
+
+  it('accepts nullRate via FixtureOptions', () => {
+    const schema = z.object({ name: z.string().nullable() });
+    const results = fixture(schema, { seed: 1, nullRate: 0.0 }).many(20);
+    expect(results.every((r) => r.name !== null)).toBe(true);
+  });
+
+  it('default rates preserve existing 80/20 behavior', () => {
+    const schema = z.object({ name: z.string().optional() });
+    const results = fixture(schema, { seed: 42 }).many(200);
+    const presentCount = results.filter((r) => r.name !== undefined).length;
+    expect(presentCount).toBeGreaterThan(100);
+    expect(presentCount).toBeLessThan(200);
+  });
+});
+
+describe('.trait() / .with()', () => {
+  const userSchema = z.object({
+    name: z.string(),
+    role: z.enum(['admin', 'editor', 'viewer']),
+    status: z.enum(['active', 'inactive', 'suspended']),
+  });
+
+  it('applies a single trait', () => {
+    const gen = fixture(userSchema, { seed: 1 }).trait('admin', { role: () => 'admin' as const });
+    const user = gen.with('admin').one();
+    expect(user.role).toBe('admin');
+  });
+
+  it('composes multiple traits', () => {
+    const gen = fixture(userSchema, { seed: 1 })
+      .trait('admin', { role: () => 'admin' as const })
+      .trait('inactive', { status: () => 'inactive' as const });
+    const user = gen.with('admin', 'inactive').one();
+    expect(user.role).toBe('admin');
+    expect(user.status).toBe('inactive');
+  });
+
+  it('explicit .override() takes precedence over traits', () => {
+    const gen = fixture(userSchema, { seed: 1 })
+      .trait('admin', { role: () => 'admin' as const })
+      .override('role', () => 'viewer' as const);
+    const user = gen.with('admin').one();
+    expect(user.role).toBe('viewer');
+  });
+
+  it('throws on unknown trait name', () => {
+    const gen = fixture(userSchema, { seed: 1 });
+    expect(() => gen.with('nonexistent')).toThrow(/Unknown trait: "nonexistent"/);
+  });
+
+  it('defining a trait does not affect generation until .with() is called', () => {
+    const gen = fixture(userSchema, { seed: 42 }).trait('admin', { role: () => 'admin' as const });
+    const user = gen.one();
+    // Without .with('admin'), role is randomly generated
+    expect(['admin', 'editor', 'viewer']).toContain(user.role);
+  });
+
+  it('traits work with .many() batch generation', () => {
+    const gen = fixture(userSchema, { seed: 1 }).trait('admin', { role: () => 'admin' as const });
+    const users = gen.with('admin').many(5);
+    expect(users.every((u) => u.role === 'admin')).toBe(true);
+  });
+});
+
+describe('.derive()', () => {
+  const userSchema = z.object({
+    firstName: z.string(),
+    lastName: z.string(),
+    fullName: z.string(),
+    username: z.string(),
+    email: z.email(),
+  });
+
+  it('derives a field from other generated fields', () => {
+    const gen = fixture(userSchema, { seed: 1 }).derive('fullName', (obj) => `${obj.firstName} ${obj.lastName}`);
+    const user = gen.one();
+    expect(user.fullName).toBe(`${user.firstName} ${user.lastName}`);
+  });
+
+  it('supports multiple chained derivations', () => {
+    const gen = fixture(userSchema, { seed: 1 })
+      .derive('fullName', (obj) => `${obj.firstName} ${obj.lastName}`)
+      .derive('email', (obj) => `${obj.username}@test.com`);
+    const user = gen.one();
+    expect(user.fullName).toBe(`${user.firstName} ${user.lastName}`);
+    expect(user.email).toBe(`${user.username}@test.com`);
+  });
+
+  it('derivations run after overrides', () => {
+    const gen = fixture(userSchema, { seed: 1 })
+      .override('firstName', () => 'Alice')
+      .override('lastName', () => 'Smith')
+      .derive('fullName', (obj) => `${obj.firstName} ${obj.lastName}`);
+    const user = gen.one();
+    expect(user.fullName).toBe('Alice Smith');
+  });
+
+  it('works with .many() batch generation', () => {
+    const gen = fixture(userSchema, { seed: 42 }).derive('fullName', (obj) => `${obj.firstName} ${obj.lastName}`);
+    const users = gen.many(5);
+    for (const user of users) {
+      expect(user.fullName).toBe(`${user.firstName} ${user.lastName}`);
+    }
+  });
+});
+
+describe('ctx.sequence', () => {
+  const schema = z.object({ id: z.number(), name: z.string() });
+
+  it('is 0 for .one()', () => {
+    const gen = fixture(schema).override('id', (ctx) => ctx.sequence);
+    expect(gen.one().id).toBe(0);
+  });
+
+  it('increments 0..N-1 for .many(N)', () => {
+    const gen = fixture(schema).override('id', (ctx) => ctx.sequence);
+    const results = gen.many(5);
+    expect(results.map((r) => r.id)).toEqual([0, 1, 2, 3, 4]);
+  });
+
+  it('works with string interpolation in overrides', () => {
+    const gen = fixture(schema).override('name', (ctx) => `user-${ctx.sequence}`);
+    const results = gen.many(3);
+    expect(results.map((r) => r.name)).toEqual(['user-0', 'user-1', 'user-2']);
+  });
+
+  it('child fields inherit parent sequence value', () => {
+    const nested = z.object({ wrapper: z.object({ id: z.number() }) });
+    const gen = fixture(nested).override(
+      (ctx) => ctx.path.at(-1) === 'id',
+      (ctx) => ctx.sequence,
+    );
+    const results = gen.many(3);
+    expect(results.map((r) => r.wrapper.id)).toEqual([0, 1, 2]);
+  });
+
+  it('works alongside uniqueness constraints', () => {
+    const gen = fixture(schema).override('id', (ctx) => ctx.sequence);
+    const results = gen.many(5, { unique: ['id'] });
+    expect(new Set(results.map((r) => r.id)).size).toBe(5);
+    expect(results.map((r) => r.id)).toEqual([0, 1, 2, 3, 4]);
+  });
+});

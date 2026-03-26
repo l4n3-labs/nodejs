@@ -8,8 +8,13 @@ export type GeneratorConfig = {
   readonly maxDepth: number;
   readonly locale: ReadonlyArray<LocaleDefinition>;
   readonly semanticFieldDetection: boolean;
+  readonly optionalRate: number;
+  readonly nullRate: number;
   // biome-ignore lint/suspicious/noExplicitAny: overrides handle heterogeneous schema types at runtime
   readonly overrides: ReadonlyArray<Override<any>>;
+  readonly derivations: ReadonlyArray<Derivation>;
+  // biome-ignore lint/suspicious/noExplicitAny: traits store heterogeneous override sets
+  readonly traits: Readonly<Record<string, ReadonlyArray<Override<any>>>>;
   readonly generators: Partial<Readonly<{ [D in ZodDefType]: Generator<D> }>>;
 };
 
@@ -21,6 +26,13 @@ export type Override<T> = {
 };
 
 export type OverrideMatcher<T> = string | ((ctx: GenContext<T>) => boolean);
+
+// --- Derivations ---
+
+export type Derivation = {
+  readonly key: string;
+  readonly compute: (obj: Record<string, unknown>) => unknown;
+};
 
 // --- Check types ---
 
@@ -61,6 +73,7 @@ export type GenContext<T, D extends ZodDefType = ZodDefType> = {
   readonly def: ResolvedDef<D>;
   readonly path: ReadonlyArray<string>;
   readonly depth: number;
+  readonly sequence: number;
   readonly faker: Faker;
   readonly config: GeneratorConfig;
   readonly checks: CheckSet;
@@ -166,6 +179,18 @@ export type FixtureGenerator<T> = {
   readonly generator: <D extends ZodDefType>(defType: D, gen: Generator<D>) => FixtureGenerator<T>;
   readonly maxDepth: (depth: number) => FixtureGenerator<T>;
   readonly locale: (locale: ReadonlyArray<LocaleDefinition>) => FixtureGenerator<T>;
+  readonly optionalRate: (rate: number) => FixtureGenerator<T>;
+  readonly nullRate: (rate: number) => FixtureGenerator<T>;
+  readonly derive: T extends Record<string, unknown>
+    ? <K extends keyof T & string>(key: K, compute: (obj: T) => T[K]) => FixtureGenerator<T>
+    : never;
+  readonly trait: T extends Record<string, unknown>
+    ? (
+        name: string,
+        overrides: { readonly [K in keyof T & string]?: (ctx: GenContext<T[K]>) => T[K] },
+      ) => FixtureGenerator<T>
+    : never;
+  readonly with: (...traitNames: ReadonlyArray<string>) => FixtureGenerator<T>;
   readonly invalid: () => unknown;
   readonly invalidMany: (count: number) => ReadonlyArray<unknown>;
 };
@@ -175,5 +200,8 @@ export type FixtureOptions = {
   readonly maxDepth?: number;
   readonly locale?: ReadonlyArray<LocaleDefinition>;
   readonly semanticFieldDetection?: boolean;
+  readonly optionalRate?: number;
+  readonly nullRate?: number;
+  readonly derivations?: ReadonlyArray<Derivation>;
   readonly generators?: GeneratorConfig['generators'];
 };

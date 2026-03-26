@@ -39,12 +39,14 @@ export const createContext = <T, D extends ZodDefType = ZodDefType>(
   depth: number,
   faker: Faker,
   generate: <U>(schema: z.ZodType<U>, key?: string) => U,
+  sequence = 0,
 ): GenContext<T, D> => ({
   schema,
   // biome-ignore lint/suspicious/noExplicitAny: accessing Zod v4 internals requires bypassing the public type surface
   def: (schema as any)._zod.def as ResolvedDef<D>,
   path,
   depth,
+  sequence,
   faker,
   config,
   checks: getCheckSet(schema),
