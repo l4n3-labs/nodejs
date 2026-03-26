@@ -12,7 +12,10 @@
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
     "format": "biome format --write .",
-    "prepare": "lefthook install"
+    "prepare": "lefthook install",
+    "docs:generate": "pnpm --filter @l4n3/docs typedoc",
+    "docs:dev": "pnpm --filter @l4n3/docs dev",
+    "docs:build": "pnpm --filter @l4n3/zodgen build && pnpm docs:generate && pnpm --filter @l4n3/docs build"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",

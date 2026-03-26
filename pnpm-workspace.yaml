@@ -3,6 +3,7 @@ packages:
   - "configs/*"
   - "examples/*"
   - "utils/*"
+  - "docs/site"
 
 onlyBuiltDependencies:
   - lefthook

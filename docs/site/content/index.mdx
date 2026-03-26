@@ -1,0 +1,40 @@
+# zodgen
+
+Generate realistic test fixtures from [Zod](https://zod.dev) schemas.
+
+**zodgen** is a fixture generator for Zod v4 that produces type-safe, realistic test data powered by [Faker.js](https://fakerjs.dev). It provides a chainable, immutable builder API with support for seeding, overrides, traits, derivations, and multiple output formats.
+
+## Features
+
+- **Zero config** — works out of the box with any Zod v4 schema
+- **Realistic data** — integrates with Faker.js for production-grade values
+- **Deterministic** — seed the generator for reproducible test data
+- **Semantic detection** — field names like `email` or `firstName` produce appropriate values
+- **Chainable API** — immutable builder pattern with `.override()`, `.derive()`, `.trait()`
+- **Batch generation** — `.many()` with uniqueness constraints
+- **Negative testing** — `.invalid()` generates intentionally wrong data
+- **Output formats** — export to CSV, JSON Lines, or SQL
+
+## Quick Example
+
+```ts
+import { z } from 'zod/v4';
+import { fixture } from '@l4n3/zodgen';
+
+const User = z.object({
+  name: z.string(),
+  email: z.string().email(),
+  age: z.number().min(18).max(99),
+});
+
+// Generate a single user
+const user = fixture(User).seed(42).one();
+
+// Generate 10 users with unique emails
+const users = fixture(User).many(10, { unique: ['email'] });
+```
+
+## Next Steps
+
+- [Getting Started](/guide/getting-started) — installation and basic usage
+- [API Reference](/api) — full API documentation

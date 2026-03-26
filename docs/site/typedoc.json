@@ -1,0 +1,13 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["../../packages/zodgen/src/index.ts", "../../packages/zodgen/src/formats/index.ts"],
+  "tsconfig": "../../packages/zodgen/tsconfig.json",
+  "plugin": ["typedoc-plugin-markdown"],
+  "out": "content/api",
+  "fileExtension": ".mdx",
+  "hidePageHeader": true,
+  "hideBreadcrumbs": true,
+  "hidePageTitle": false,
+  "entryFileName": "index",
+  "readme": "none"
+}

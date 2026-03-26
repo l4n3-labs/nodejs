@@ -158,6 +158,38 @@ const configFromOptions = (opts?: FixtureOptions): GeneratorConfig => ({
   generators: { ...defaultConfig.generators, ...opts?.generators },
 });
 
+/**
+ * Creates a {@link FixtureGenerator} for a Zod schema that produces realistic test data.
+ * Returns an immutable, chainable builder for configuring seeds, overrides, traits, and more.
+ *
+ * Also available as `fixture.create()` with the same signature.
+ *
+ * @template T - The TypeScript type inferred from the Zod schema.
+ * @param schema - The Zod schema to generate fixtures for.
+ * @param opts - Optional configuration. See {@link FixtureOptions}.
+ * @returns A {@link FixtureGenerator} bound to the schema and options.
+ *
+ * @example
+ * ```ts
+ * import { z } from 'zod/v4';
+ * import { fixture } from '@l4n3/zodgen';
+ *
+ * const User = z.object({
+ *   name: z.string(),
+ *   email: z.string().email(),
+ *   age: z.number().min(18).max(99),
+ * });
+ *
+ * // Generate a single user
+ * const user = fixture(User).seed(42).one();
+ *
+ * // Generate 10 users with unique emails
+ * const users = fixture(User).many(10, { unique: ['email'] });
+ *
+ * // Use fixture.create() — identical behavior
+ * const gen = fixture.create(User, { seed: 1 });
+ * ```
+ */
 export const fixture = Object.assign(
   <T>(schema: z.ZodType<T>, opts?: FixtureOptions): FixtureGenerator<T> =>
     createGenerator(schema, configFromOptions(opts)),
