@@ -18,6 +18,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@aws-lambda-powertools/parser": "^2.0.0",
     "@faker-js/faker": "^9.0.0",
     "@l4n3/zodgen": "workspace:*",
     "zod": "^4.0.0-beta.0"

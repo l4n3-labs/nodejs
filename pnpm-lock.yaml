@@ -123,6 +123,9 @@ importers:
 
   examples/zodgen-usage:
     dependencies:
+      '@aws-lambda-powertools/parser':
+        specifier: ^2.0.0
+        version: 2.32.0(zod@4.3.6)
       '@faker-js/faker':
         specifier: ^9.0.0
         version: 9.9.0
@@ -328,6 +331,24 @@ packages:
 
   '@antfu/install-pkg@1.1.0':
     resolution: {integrity: sha512-MGQsmw10ZyI+EJo45CdSER4zEb+p31LpDAFp2Z3gkSd1yqVZGi0Ebx++YTEMonJy4oChEMLsxZ64j8FH6sSqtQ==}
+
+  '@aws-lambda-powertools/commons@2.32.0':
+    resolution: {integrity: sha512-vsdakJDZu/KkJ5+1WHkawQ5R06aCK0XYB3nc3tpcBfO1YmOHkn+QpuGiZtkmpzIykGPAO9lnBjK5joAeim2o4A==}
+
+  '@aws-lambda-powertools/parser@2.32.0':
+    resolution: {integrity: sha512-PvBBymT+XG8bwvzQENdznl+RG0xJbcQWMo2OVQqDZDP66whnr1oBW/SPpnQNLB/5GE3LGEMdEp6ntnN+We3+TQ==}
+    peerDependencies:
+      '@middy/core': 4.x || 5.x || 6.x || 7.x
+      zod: 4.x
+    peerDependenciesMeta:
+      '@middy/core':
+        optional: true
+      zod:
+        optional: true
+
+  '@aws/lambda-invoke-store@0.2.4':
+    resolution: {integrity: sha512-iY8yvjE0y651BixKNPgmv1WrQc+GZ142sb0z4gYnChDDY2YqI4P/jsSopBWrKfAt7LOJAkOXt7rC/hms+WclQQ==}
+    engines: {node: '>=18.0.0'}
 
   '@babel/helper-string-parser@7.27.1':
     resolution: {integrity: sha512-qMlSxKbpRlAridDExk92nSobyDdpPijUq2DW6oDnUqd0iOGxmQjyqhMIihI9+zv4LPyZdRje2cavWPbCbWm3eA==}
@@ -1315,6 +1336,9 @@ packages:
 
   '@shikijs/vscode-textmate@10.0.2':
     resolution: {integrity: sha512-83yeghZ2xxin3Nj8z1NMd/NCuca+gsYXswywDy5bHvwlWL8tpTQmzGeUuHd9FC3E/SBEMvzJRwWEOz5gGes9Qg==}
+
+  '@standard-schema/spec@1.1.0':
+    resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
@@ -3721,6 +3745,19 @@ snapshots:
       package-manager-detector: 1.6.0
       tinyexec: 1.0.4
 
+  '@aws-lambda-powertools/commons@2.32.0':
+    dependencies:
+      '@aws/lambda-invoke-store': 0.2.4
+
+  '@aws-lambda-powertools/parser@2.32.0(zod@4.3.6)':
+    dependencies:
+      '@aws-lambda-powertools/commons': 2.32.0
+      '@standard-schema/spec': 1.1.0
+    optionalDependencies:
+      zod: 4.3.6
+
+  '@aws/lambda-invoke-store@0.2.4': {}
+
   '@babel/helper-string-parser@7.27.1': {}
 
   '@babel/helper-validator-identifier@7.28.5': {}
@@ -4512,6 +4549,8 @@ snapshots:
       '@types/hast': 3.0.4
 
   '@shikijs/vscode-textmate@10.0.2': {}
+
+  '@standard-schema/spec@1.1.0': {}
 
   '@swc/helpers@0.5.15':
     dependencies:

@@ -26,6 +26,11 @@ npx tsx examples/zodgen-usage/src/basic-primitives.ts
 | [`custom-overrides.ts`](src/custom-overrides.ts) | `fixture.create()`, `override()` with string and predicate matchers |
 | [`recursive-schemas.ts`](src/recursive-schemas.ts) | `z.lazy()` for trees, linked lists, and nested comment threads |
 | [`restaurant-menu.ts`](src/restaurant-menu.ts) | Domain example: defaults, overrides, uniqueness, and full schema composition |
+| [`aws-sqs.ts`](src/aws-sqs.ts) | SQS event mocking with overrides, derived md5, batch generation |
+| [`aws-sns.ts`](src/aws-sns.ts) | SNS event mocking with traits for notification types |
+| [`aws-lambda-function-url.ts`](src/aws-lambda-function-url.ts) | Lambda Function URL events with traits and overrides |
+| [`aws-api-gateway.ts`](src/aws-api-gateway.ts) | API Gateway REST & HTTP event mocking, sequences, batch generation |
+| [`aws-cognito.ts`](src/aws-cognito.ts) | Cognito trigger events with seeded generation and traits |
 
 ## Key APIs
 
