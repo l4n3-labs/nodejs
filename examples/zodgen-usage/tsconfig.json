@@ -2,7 +2,8 @@
   "extends": "@l4n3/tsconfig/library.json",
   "compilerOptions": {
     "outDir": "dist",
-    "rootDir": "src"
+    "rootDir": "src",
+    "types": ["node"],
   },
-  "include": ["src"]
+  "include": ["src"],
 }

@@ -28,6 +28,7 @@
     "@l4n3/biome-config": "workspace:*",
     "@l4n3/tsconfig": "workspace:*",
     "@l4n3/vitest-config": "workspace:*",
+    "@types/node": "^24.12.0",
     "@typescript/native-preview": "^7.0.0-dev",
     "vitest": "^3.2.1"
   }
