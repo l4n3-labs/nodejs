@@ -1,4 +1,4 @@
-examples/zodgen-usage/**/*.json
+examples/fakeish-usage/**/*.json
 # Build output
 dist/
 

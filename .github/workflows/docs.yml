@@ -4,7 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'packages/zodgen/src/**'
+      - 'packages/fakeish/src/**'
       - 'docs/site/**'
   workflow_dispatch:
 
@@ -33,8 +33,8 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build zodgen
-        run: pnpm --filter @l4n3/zodgen build
+      - name: Build fakeish
+        run: pnpm --filter @l4n3/fakeish build
 
       - name: Generate API docs
         run: pnpm --filter @l4n3/docs typedoc

@@ -2,17 +2,17 @@
 
 ## Installation
 
-Install `@l4n3/zodgen` alongside its peer dependencies:
+Install `@l4n3/fakeish` alongside its peer dependencies:
 
 ```bash
 # npm
-npm install @l4n3/zodgen zod @faker-js/faker
+npm install @l4n3/fakeish zod @faker-js/faker
 
 # pnpm
-pnpm add @l4n3/zodgen zod @faker-js/faker
+pnpm add @l4n3/fakeish zod @faker-js/faker
 ```
 
-> **Note:** zodgen requires Zod v4 (`>=4.0.0-beta.0`) and Faker.js v9+.
+> **Note:** fakeish requires Zod v4 (`>=4.0.0-beta.0`) and Faker.js v9+.
 
 ## Basic Usage
 
@@ -20,7 +20,7 @@ Import `fixture` and pass any Zod schema to generate test data:
 
 ```ts
 import { z } from 'zod/v4';
-import { fixture } from '@l4n3/zodgen';
+import { fixture } from '@l4n3/fakeish';
 
 const Product = z.object({
   name: z.string(),
@@ -102,7 +102,7 @@ const gen = fixture(UserSchema).derive(
 Export generated data to CSV, JSON Lines, or SQL:
 
 ```ts
-import { toCSV, toJSONLines, toSQL } from '@l4n3/zodgen/formats';
+import { toCSV, toJSONLines, toSQL } from '@l4n3/fakeish/formats';
 
 const users = fixture(UserSchema).many(10);
 

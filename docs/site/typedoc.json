@@ -1,7 +1,7 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["../../packages/zodgen/src/index.ts", "../../packages/zodgen/src/formats/index.ts"],
-  "tsconfig": "../../packages/zodgen/tsconfig.json",
+  "entryPoints": ["../../packages/fakeish/src/index.ts", "../../packages/fakeish/src/formats/index.ts"],
+  "tsconfig": "../../packages/fakeish/tsconfig.json",
   "plugin": ["typedoc-plugin-markdown"],
   "out": "content/api",
   "fileExtension": ".mdx",

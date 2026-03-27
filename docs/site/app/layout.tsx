@@ -5,13 +5,13 @@ import 'nextra-theme-docs/style.css';
 
 export const metadata = {
   title: {
-    default: 'zodgen',
-    template: '%s – zodgen',
+    default: 'fakeish',
+    template: '%s – fakeish',
   },
   description: 'Generate realistic test fixtures from Zod schemas',
 };
 
-const navbar = <Navbar logo={<b>zodgen</b>} projectLink="https://github.com/l4n3/nodejs" />;
+const navbar = <Navbar logo={<b>fakeish</b>} projectLink="https://github.com/l4n3/nodejs" />;
 
 const footer = <Footer>MIT {new Date().getFullYear()} © l4n3.</Footer>;
 

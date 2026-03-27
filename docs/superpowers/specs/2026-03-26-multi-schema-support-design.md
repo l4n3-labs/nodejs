@@ -5,7 +5,7 @@
 
 ## Context
 
-zodgen is currently tightly coupled to Zod v4 internals (`._zod.def`, check system, 32+ type definitions). While it's the most feature-rich and performant Zod mock data generator, it only serves the Zod v4 ecosystem.
+fakeish is currently tightly coupled to Zod v4 internals (`._zod.def`, check system, 32+ type definitions). While it's the most feature-rich and performant Zod mock data generator, it only serves the Zod v4 ecosystem.
 
 The goal is to support **JSON Schema** and **OpenAPI** as input formats — enabling fixture generation from API specs, schema registries, and any library that exports JSON Schema (TypeBox, ArkType, Valibot). This also positions the core engine as a reusable foundation for future schema adapters.
 
@@ -18,7 +18,7 @@ The goal is to support **JSON Schema** and **OpenAPI** as input formats — enab
 ```
 packages/
   gen-core/              # Schema-agnostic generation engine
-  zodgen/                # Zod v4/mini adapter (refactored from current)
+  fakeish/               # Zod v4/mini adapter (refactored from current)
   jsonschema-gen/        # JSON Schema + OpenAPI adapter (new)
 ```
 
@@ -26,7 +26,7 @@ packages/
 
 Owns the generation pipeline: schema node types, constraint types, generation context, dispatch/resolve, built-in generators, override system, batch generation, seeding/faker lifecycle, and the immutable FixtureGenerator builder.
 
-### zodgen — Zod v4/mini Adapter
+### fakeish — Zod v4/mini Adapter
 
 Thin wrapper that converts Zod schemas to `SchemaNode` lazily and re-exports `fixture()` pre-wired with the Zod adapter. Registers Zod-specific generator overrides (semantic field detection, template literals, invalid generation).
 
@@ -267,7 +267,7 @@ type GenContext<N extends SchemaNode = SchemaNode> = {
 
 Generators are refactored to work on SchemaNode. This is mostly a simplification.
 
-**Before (Zod-coupled):**
+**Before (Zod-coupled, in fakeish):**
 ```typescript
 const generateString = (ctx: GenContext<unknown, 'string'>) => {
   const minCheck = ctx.checks.find('min_length')
@@ -286,27 +286,27 @@ const generateString = (ctx: GenContext<StringNode>) => {
 }
 ```
 
-### What Stays in zodgen (Not Core) — Initially
+### What Stays in fakeish (Not Core) — Initially
 
-- **Semantic field detection** — uses `ctx.path` which is adapter-agnostic, but stays in zodgen initially since it's already there and working. Good candidate to move to gen-core in Phase 5.
+- **Semantic field detection** — uses `ctx.path` which is adapter-agnostic, but stays in fakeish initially since it's already there and working. Good candidate to move to gen-core in Phase 5.
 - **Template literal generation** — Zod-specific type with no JSON Schema equivalent. The `template_literal` node type exists in SchemaNode for Zod, but JSON Schema adapter will never produce it.
 - **Invalid data generation** — needs access to the original Zod schema for `safeParse` validation. Could be generalized later with a validator callback.
-- **`.for()` schema rebinding** — Zod-specific (rebind to a different Zod schema). zodgen wraps this to convert the new schema through the adapter.
+- **`.for()` schema rebinding** — Zod-specific (rebind to a different Zod schema). fakeish wraps this to convert the new schema through the adapter.
 
 These are registered by the Zod adapter as generator overrides that layer on top of the core generators.
 
 ## Type Safety
 
-For zodgen, `FixtureGenerator<T>` infers `T` from the Zod schema — this is preserved. The Zod adapter extracts `z.infer<TSchema>` and passes it as the generic parameter.
+For fakeish, `FixtureGenerator<T>` infers `T` from the Zod schema — this is preserved. The Zod adapter extracts `z.infer<TSchema>` and passes it as the generic parameter.
 
 For jsonschema-gen, `T` is `unknown` since JSON Schema objects don't carry TypeScript type information. Users can provide a type parameter: `fixture<MyType>(jsonSchema)` for type-safe output if they have a corresponding TypeScript type.
 
 ## Public API
 
-### zodgen (unchanged)
+### fakeish (unchanged)
 
 ```typescript
-import { fixture } from '@l4n3/zodgen'
+import { fixture } from '@l4n3/fakeish'
 
 const user = fixture(UserSchema).seed(42).one()
 const users = fixture(UserSchema).many(100, { unique: ['email'] })
@@ -343,14 +343,14 @@ const pets = schemas['Pet'].many(10)
 
 ### Phase 1: Extract gen-core
 
-**Goal:** Extract the schema-agnostic generation engine from zodgen into `packages/gen-core`.
+**Goal:** Extract the schema-agnostic generation engine from fakeish into `packages/gen-core`.
 
 **Files to create in gen-core:**
 - `src/schema.ts` — SchemaNode discriminated union and constraint types
-- `src/context.ts` — GenContext working on SchemaNode (adapted from zodgen's context.ts)
-- `src/resolve.ts` — Dispatch + override system (adapted from zodgen's resolve.ts)
+- `src/context.ts` — GenContext working on SchemaNode (adapted from fakeish's context.ts)
+- `src/resolve.ts` — Dispatch + override system (adapted from fakeish's resolve.ts)
 - `src/generators/` — All built-in generators refactored to work on SchemaNode
-- `src/fixture.ts` — FixtureGenerator builder (adapted from zodgen's fixture.ts)
+- `src/fixture.ts` — FixtureGenerator builder (adapted from fakeish's fixture.ts)
 - `src/index.ts` — Public exports
 
 **Key refactoring:**
@@ -361,16 +361,16 @@ const pets = schemas['Pet'].many(10)
 
 **Estimated effort:** Medium (most code moves with mechanical refactoring)
 
-### Phase 2: Refactor zodgen as adapter
+### Phase 2: Refactor fakeish as adapter
 
-**Goal:** Make zodgen a thin adapter over gen-core.
+**Goal:** Make fakeish a thin adapter over gen-core.
 
-**Files to modify/create in zodgen:**
+**Files to modify/create in fakeish:**
 - `src/adapter.ts` — `zodAdapter: SchemaAdapter<z.ZodType>` implementation
 - `src/index.ts` — Re-export `fixture()` pre-wired with Zod adapter
-- `src/semantic.ts` — Semantic field detection (stays in zodgen)
-- `src/template-literal.ts` — Template literal generator (stays in zodgen)
-- `src/invalid.ts` — Invalid generation (stays in zodgen)
+- `src/semantic.ts` — Semantic field detection (stays in fakeish)
+- `src/template-literal.ts` — Template literal generator (stays in fakeish)
+- `src/invalid.ts` — Invalid generation (stays in fakeish)
 
 **Key changes:**
 - `fixture(schema)` internally calls `zodAdapter.toNode(schema)` then passes to gen-core's `fixture()`
@@ -419,8 +419,8 @@ const pets = schemas['Pet'].many(10)
 
 ## Verification
 
-### After Phase 1-2 (gen-core + zodgen refactor)
-- All existing zodgen tests pass unchanged
+### After Phase 1-2 (gen-core + fakeish refactor)
+- All existing fakeish tests pass unchanged
 - Benchmark performance within 10% of current (no regression from adapter layer)
 - `pnpm check` passes across all packages
 
@@ -428,7 +428,7 @@ const pets = schemas['Pet'].many(10)
 - New test suite covering all JSON Schema Draft 2020-12 keywords
 - Test: generate from JSON Schema → validate with ajv
 - Test: extract schemas from a real OpenAPI spec (e.g., Petstore) → generate valid fixtures
-- Benchmark: JSON Schema generation performance comparable to zodgen core
+- Benchmark: JSON Schema generation performance comparable to fakeish core
 
 ## Risks
 

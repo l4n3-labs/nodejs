@@ -3,6 +3,6 @@
   "references": [
     { "path": "packages/poc-utils" },
     { "path": "packages/style-dictionary" },
-    { "path": "packages/zodgen" }
+    { "path": "packages/fakeish" }
   ]
 }

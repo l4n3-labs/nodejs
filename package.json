@@ -15,7 +15,7 @@
     "prepare": "lefthook install",
     "docs:generate": "pnpm --filter @l4n3/docs typedoc",
     "docs:dev": "pnpm --filter @l4n3/docs dev",
-    "docs:build": "pnpm --filter @l4n3/zodgen build && pnpm docs:generate && pnpm --filter @l4n3/docs build"
+    "docs:build": "pnpm --filter @l4n3/fakeish build && pnpm docs:generate && pnpm --filter @l4n3/docs build"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",

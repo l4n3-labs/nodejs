@@ -1,8 +1,8 @@
-# zodgen
+# fakeish
 
 Generate realistic test fixtures from [Zod](https://zod.dev) schemas.
 
-**zodgen** is a fixture generator for Zod v4 that produces type-safe, realistic test data powered by [Faker.js](https://fakerjs.dev). It provides a chainable, immutable builder API with support for seeding, overrides, traits, derivations, and multiple output formats.
+**fakeish** is a fixture generator for Zod v4 that produces type-safe, realistic test data powered by [Faker.js](https://fakerjs.dev). It provides a chainable, immutable builder API with support for seeding, overrides, traits, derivations, and multiple output formats.
 
 ## Features
 
@@ -19,7 +19,7 @@ Generate realistic test fixtures from [Zod](https://zod.dev) schemas.
 
 ```ts
 import { z } from 'zod/v4';
-import { fixture } from '@l4n3/zodgen';
+import { fixture } from '@l4n3/fakeish';
 
 const User = z.object({
   name: z.string(),
