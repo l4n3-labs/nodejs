@@ -8,7 +8,7 @@
     "dev": "next",
     "build": "next build",
     "start": "next start",
-    "typedoc": "typedoc"
+    "typedoc": "typedoc && node --experimental-strip-types scripts/generate-api-meta.ts"
   },
   "dependencies": {
     "next": "^15.3.0",
