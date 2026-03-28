@@ -1,6 +1,6 @@
 {
   "name": "@l4n3/fakeish",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "Schema-driven fake data generation with Zod and Faker.js",
   "license": "Apache-2.0",
