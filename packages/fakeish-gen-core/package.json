@@ -1,8 +1,17 @@
 {
-  "name": "@l4n3/gen-core",
+  "name": "@l4n3/fakeish-gen-core",
   "version": "0.1.0",
-  "private": true,
   "type": "module",
+  "description": "Core generator primitives for @l4n3 data generation libraries",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/l4n3-labs/nodejs.git",
+    "directory": "packages/fakeish-gen-core"
+  },
+  "files": [
+    "dist"
+  ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",

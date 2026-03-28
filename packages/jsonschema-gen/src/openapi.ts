@@ -1,4 +1,4 @@
-import { fixture as coreFixture, type FixtureGenerator, type FixtureOptions } from '@l4n3/gen-core';
+import { fixture as coreFixture, type FixtureGenerator, type FixtureOptions } from '@l4n3/fakeish-gen-core';
 import { toNode } from './adapter.js';
 import type { JsonSchema } from './types.js';
 

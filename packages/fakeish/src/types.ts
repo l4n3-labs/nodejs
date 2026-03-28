@@ -1,5 +1,5 @@
 import type { LocaleDefinition } from '@faker-js/faker';
-import type { FixtureGenerator, GenContext, Generator, NodeType } from '@l4n3/gen-core';
+import type { FixtureGenerator, GenContext, Generator, NodeType } from '@l4n3/fakeish-gen-core';
 import type { z } from 'zod/v4';
 
 // Re-export gen-core types that fakeish users need
@@ -13,7 +13,7 @@ export type {
   Override,
   OverrideMatcher,
   SchemaNode,
-} from '@l4n3/gen-core';
+} from '@l4n3/fakeish-gen-core';
 
 // --- Zod-specific public API ---
 

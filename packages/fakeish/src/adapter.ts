@@ -5,7 +5,7 @@ import type {
   SchemaNode,
   SizeConstraints,
   StringConstraints,
-} from '@l4n3/gen-core';
+} from '@l4n3/fakeish-gen-core';
 import type { z } from 'zod/v4';
 
 type ZodCheckDef = z.core.$ZodCheckDef;

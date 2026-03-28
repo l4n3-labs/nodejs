@@ -22,7 +22,7 @@
     "format": "biome format --write ."
   },
   "dependencies": {
-    "@l4n3/gen-core": "workspace:*"
+    "@l4n3/fakeish-gen-core": "workspace:*"
   },
   "peerDependencies": {
     "@faker-js/faker": ">=9.0.0"

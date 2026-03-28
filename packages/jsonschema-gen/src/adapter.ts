@@ -1,4 +1,4 @@
-import type { SchemaNode } from '@l4n3/gen-core';
+import type { SchemaNode } from '@l4n3/fakeish-gen-core';
 import type { JsonSchema } from './types.js';
 
 type RefResolver = (ref: string) => SchemaNode;

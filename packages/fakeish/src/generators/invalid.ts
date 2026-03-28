@@ -1,6 +1,6 @@
 import type { Faker } from '@faker-js/faker';
-import type { GeneratorConfig } from '@l4n3/gen-core';
-import { resolve } from '@l4n3/gen-core/resolve';
+import type { GeneratorConfig } from '@l4n3/fakeish-gen-core';
+import { resolve } from '@l4n3/fakeish-gen-core/resolve';
 import type { z } from 'zod/v4';
 import { toNode } from '../adapter.js';
 

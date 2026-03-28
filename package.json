@@ -15,13 +15,19 @@
     "prepare": "lefthook install",
     "docs:generate": "pnpm --filter @l4n3/docs typedoc",
     "docs:dev": "pnpm --filter @l4n3/docs dev",
-    "docs:build": "pnpm --filter @l4n3/fakeish build && pnpm docs:generate && pnpm --filter @l4n3/docs build"
+    "docs:build": "pnpm --filter @l4n3/fakeish build && pnpm docs:generate && pnpm --filter @l4n3/docs build",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "publish-packages": "turbo run build && changeset publish"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.8",
+    "@changesets/changelog-github": "^0.6.0",
+    "@changesets/cli": "^2.30.0",
     "@l4n3/biome-config": "workspace:*",
     "@typescript/native-preview": "^7.0.0-dev",
     "lefthook": "^2.1.4",
+    "tsup": "^8.5.1",
     "turbo": "^2.8.20",
     "vitest": "^3.2.1"
   }

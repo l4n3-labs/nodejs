@@ -7,9 +7,9 @@ import {
   type NodeType,
   type NumberNode,
   type StringNode,
-} from '@l4n3/gen-core';
-import { generateNumber as coreGenerateNumber } from '@l4n3/gen-core/generators/number';
-import { generateString as coreGenerateString } from '@l4n3/gen-core/generators/string';
+} from '@l4n3/fakeish-gen-core';
+import { generateNumber as coreGenerateNumber } from '@l4n3/fakeish-gen-core/generators/number';
+import { generateString as coreGenerateString } from '@l4n3/fakeish-gen-core/generators/string';
 import type { z } from 'zod/v4';
 import { toNode } from './adapter.js';
 import { generateInvalid } from './generators/invalid.js';

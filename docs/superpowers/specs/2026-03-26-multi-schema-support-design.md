@@ -17,12 +17,12 @@ The goal is to support **JSON Schema** and **OpenAPI** as input formats — enab
 
 ```
 packages/
-  gen-core/              # Schema-agnostic generation engine
+  fakeish-fakeish-gen-core/      # Schema-agnostic generation engine
   fakeish/               # Zod v4/mini adapter (refactored from current)
   jsonschema-gen/        # JSON Schema + OpenAPI adapter (new)
 ```
 
-### gen-core — Schema-Agnostic Generation Engine
+### fakeish-gen-core — Schema-Agnostic Generation Engine
 
 Owns the generation pipeline: schema node types, constraint types, generation context, dispatch/resolve, built-in generators, override system, batch generation, seeding/faker lifecycle, and the immutable FixtureGenerator builder.
 
@@ -181,7 +181,7 @@ const zodAdapter: SchemaAdapter<z.ZodType> = {
 
 **Lazy child resolution:** Object shapes and array elements use getter properties or lazy wrappers so that deeply nested schemas aren't traversed until the generator actually needs them.
 
-**Zod-specific generators:** Semantic field detection, template literal generation, and invalid data generation are registered as custom generator overrides by the Zod adapter — they augment the core generators rather than living in gen-core.
+**Zod-specific generators:** Semantic field detection, template literal generation, and invalid data generation are registered as custom generator overrides by the Zod adapter — they augment the core generators rather than living in fakeish-gen-core.
 
 ### JSON Schema Adapter
 
@@ -288,7 +288,7 @@ const generateString = (ctx: GenContext<StringNode>) => {
 
 ### What Stays in fakeish (Not Core) — Initially
 
-- **Semantic field detection** — uses `ctx.path` which is adapter-agnostic, but stays in fakeish initially since it's already there and working. Good candidate to move to gen-core in Phase 5.
+- **Semantic field detection** — uses `ctx.path` which is adapter-agnostic, but stays in fakeish initially since it's already there and working. Good candidate to move to fakeish-gen-core in Phase 5.
 - **Template literal generation** — Zod-specific type with no JSON Schema equivalent. The `template_literal` node type exists in SchemaNode for Zod, but JSON Schema adapter will never produce it.
 - **Invalid data generation** — needs access to the original Zod schema for `safeParse` validation. Could be generalized later with a validator callback.
 - **`.for()` schema rebinding** — Zod-specific (rebind to a different Zod schema). fakeish wraps this to convert the new schema through the adapter.
@@ -341,11 +341,11 @@ const pets = schemas['Pet'].many(10)
 
 ## Implementation Phases
 
-### Phase 1: Extract gen-core
+### Phase 1: Extract fakeish-gen-core
 
-**Goal:** Extract the schema-agnostic generation engine from fakeish into `packages/gen-core`.
+**Goal:** Extract the schema-agnostic generation engine from fakeish into `packages/fakeish-gen-core`.
 
-**Files to create in gen-core:**
+**Files to create in fakeish-gen-core:**
 - `src/schema.ts` — SchemaNode discriminated union and constraint types
 - `src/context.ts` — GenContext working on SchemaNode (adapted from fakeish's context.ts)
 - `src/resolve.ts` — Dispatch + override system (adapted from fakeish's resolve.ts)
@@ -357,13 +357,13 @@ const pets = schemas['Pet'].many(10)
 - Replace `ctx.def` with `ctx.node` throughout generators
 - Replace `ctx.checks.find(...)` with direct constraint property access
 - Replace `ZodDefType` dispatch string with `NodeType`
-- Extract faker caching and seeding to gen-core
+- Extract faker caching and seeding to fakeish-gen-core
 
 **Estimated effort:** Medium (most code moves with mechanical refactoring)
 
 ### Phase 2: Refactor fakeish as adapter
 
-**Goal:** Make fakeish a thin adapter over gen-core.
+**Goal:** Make fakeish a thin adapter over fakeish-gen-core.
 
 **Files to modify/create in fakeish:**
 - `src/adapter.ts` — `zodAdapter: SchemaAdapter<z.ZodType>` implementation
@@ -373,7 +373,7 @@ const pets = schemas['Pet'].many(10)
 - `src/invalid.ts` — Invalid generation (stays in fakeish)
 
 **Key changes:**
-- `fixture(schema)` internally calls `zodAdapter.toNode(schema)` then passes to gen-core's `fixture()`
+- `fixture(schema)` internally calls `zodAdapter.toNode(schema)` then passes to fakeish-gen-core's `fixture()`
 - Zod-specific generators registered as overrides via `config.generators`
 
 **Estimated effort:** Medium (adapter conversion logic + ensuring no regressions)
@@ -412,14 +412,14 @@ const pets = schemas['Pet'].many(10)
 
 ### Phase 5 (Future): Backfill advanced features
 
-- Move semantic field detection to gen-core (make it adapter-agnostic)
-- Move invalid generation to gen-core
+- Move semantic field detection to fakeish-gen-core (make it adapter-agnostic)
+- Move invalid generation to fakeish-gen-core
 - Add JSON Schema `pattern` (regex) → string generation
 - Add `additionalProperties` support for JSON Schema objects
 
 ## Verification
 
-### After Phase 1-2 (gen-core + fakeish refactor)
+### After Phase 1-2 (fakeish-gen-core + fakeish refactor)
 - All existing fakeish tests pass unchanged
 - Benchmark performance within 10% of current (no regression from adapter layer)
 - `pnpm check` passes across all packages

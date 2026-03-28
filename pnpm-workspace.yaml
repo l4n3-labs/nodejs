@@ -6,4 +6,5 @@ packages:
   - "docs/site"
 
 onlyBuiltDependencies:
+  - esbuild
   - lefthook
