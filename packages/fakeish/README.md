@@ -35,6 +35,34 @@ const users = fixture.many(UserSchema, 10);
 const deterministic = fixture(UserSchema, { seed: 42 });
 ```
 
+## Regex patterns
+
+Generate strings that match a regular expression:
+
+```typescript
+import { z } from 'zod/v4';
+import { fixture } from '@l4n3/fakeish';
+
+// Simple pattern
+const code = fixture(z.string().regex(/[A-Z]{2}-\d{4}/)).one();
+// e.g. 'QX-7291'
+
+// Object with regex-constrained fields
+const OrderSchema = z.object({
+  orderId: z.string().regex(/ORD-\d{6}/),
+  trackingCode: z.string().regex(/[A-Z0-9]{10}/),
+  status: z.enum(['pending', 'shipped', 'delivered']),
+});
+
+const order = fixture(OrderSchema).one();
+// { orderId: 'ORD-483201', trackingCode: 'K7M2P9X4RQ', status: 'shipped' }
+
+// Batch — every item matches the pattern
+const codes = fixture(z.string().regex(/\d{3}-\d{3}-\d{4}/)).many(10);
+```
+
+Supported regex features: character classes (`[a-z]`, `[^0-9]`, `\d`, `\w`, `\s`), quantifiers (`*`, `+`, `?`, `{n}`, `{n,m}`), groups, alternation (`a|b`), anchors, backreferences, and dot (`.`).
+
 ## Overrides
 
 Use `fixture.create()` with `override()` to customize how specific fields are generated.

@@ -54,6 +54,22 @@ const users = fixture(UserSchema).many(100, {
 });
 ```
 
+## Regex Patterns
+
+Generate strings matching a regular expression using `z.string().regex()`:
+
+```ts
+const schema = z.object({
+  sku: z.string().regex(/[A-Z]{3}-\d{4}/),
+  serial: z.string().regex(/[A-Z0-9]{8}/),
+});
+
+const product = fixture(schema).one();
+// { sku: 'MKT-3847', serial: 'R7K2M9P4' }
+```
+
+Supported features: character classes, quantifiers, groups, alternation, anchors, backreferences, and dot.
+
 ## Overrides
 
 Customize how specific fields are generated:

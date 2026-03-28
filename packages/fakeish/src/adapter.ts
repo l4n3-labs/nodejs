@@ -37,12 +37,17 @@ const extractStringConstraints = (schema: z.ZodType): StringConstraints => {
     (f) => f.format !== 'starts_with' && f.format !== 'ends_with' && f.format !== 'includes',
   );
 
+  const regexCheck = formatChecks.find((f) => f.format === 'regex') as
+    | (z.core.$ZodCheckStringFormatDef & { pattern?: RegExp })
+    | undefined;
+
   const minCheck = findCheck<z.core.$ZodCheckMinLengthDef>(checks, 'min_length');
   const maxCheck = findCheck<z.core.$ZodCheckMaxLengthDef>(checks, 'max_length');
   const exactCheck = findCheck<z.core.$ZodCheckLengthEqualsDef>(checks, 'length_equals');
 
   return {
     ...(wellKnown ? { format: wellKnown.format } : {}),
+    ...(regexCheck?.pattern ? { pattern: regexCheck.pattern.source } : {}),
     ...(prefix ? { startsWith: prefix } : {}),
     ...(suffix ? { endsWith: suffix } : {}),
     ...(includes ? { includes } : {}),
