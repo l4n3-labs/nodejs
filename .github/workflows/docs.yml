@@ -1,11 +1,6 @@
 name: Deploy Docs
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'packages/fakeish/src/**'
-      - 'docs/site/**'
   workflow_dispatch:
 
 permissions:
