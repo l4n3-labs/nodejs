@@ -1,0 +1,24 @@
+{
+  "name": "@l4n3/vitest-config",
+  "version": "0.0.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsgo --build",
+    "check": "tsgo --noEmit"
+  },
+  "dependencies": {
+    "vitest": "^3.2.1"
+  },
+  "devDependencies": {
+    "@l4n3/tsconfig": "workspace:*",
+    "@typescript/native-preview": "^7.0.0-dev"
+  }
+}

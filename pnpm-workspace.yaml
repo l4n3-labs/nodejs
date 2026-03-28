@@ -1,0 +1,10 @@
+packages:
+  - "packages/*"
+  - "configs/*"
+  - "examples/*"
+  - "utils/*"
+  - "docs/site"
+
+onlyBuiltDependencies:
+  - esbuild
+  - lefthook

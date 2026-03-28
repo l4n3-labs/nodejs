@@ -1,0 +1,40 @@
+{
+  "name": "@l4n3/jsonschema-gen",
+  "version": "0.1.0",
+  "private": true,
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./openapi": {
+      "types": "./dist/openapi.d.ts",
+      "import": "./dist/openapi.js"
+    }
+  },
+  "scripts": {
+    "build": "tsgo --build",
+    "check": "tsgo --noEmit",
+    "test": "vitest run",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "format": "biome format --write ."
+  },
+  "dependencies": {
+    "@l4n3/fakeish-gen-core": "workspace:*"
+  },
+  "peerDependencies": {
+    "@faker-js/faker": ">=9.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.4.8",
+    "@faker-js/faker": "^9.0.0",
+    "@l4n3/biome-config": "workspace:*",
+    "@l4n3/tsconfig": "workspace:*",
+    "@l4n3/vitest-config": "workspace:*",
+    "@typescript/native-preview": "^7.0.0-dev",
+    "vitest": "^3.2.1"
+  }
+}

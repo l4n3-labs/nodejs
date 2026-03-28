@@ -1,0 +1,125 @@
+# Getting Started
+
+## Installation
+
+Install `@l4n3/fakeish` alongside its peer dependencies:
+
+```bash
+# npm
+npm install @l4n3/fakeish zod @faker-js/faker
+
+# pnpm
+pnpm add @l4n3/fakeish zod @faker-js/faker
+```
+
+> **Note:** fakeish requires Zod v4 (`>=4.0.0-beta.0`) and Faker.js v9+.
+
+## Basic Usage
+
+Import `fixture` and pass any Zod schema to generate test data:
+
+```ts
+import { z } from 'zod/v4';
+import { fixture } from '@l4n3/fakeish';
+
+const Product = z.object({
+  name: z.string(),
+  price: z.number().min(0).max(1000),
+  inStock: z.boolean(),
+});
+
+const product = fixture(Product).one();
+// { name: 'lorem ipsum', price: 482.37, inStock: true }
+```
+
+## Deterministic Output
+
+Use `.seed()` to produce the same data every time — ideal for snapshot tests:
+
+```ts
+const gen = fixture(Product).seed(42);
+
+const a = gen.one();
+const b = gen.one();
+// a and b are identical
+```
+
+## Batch Generation
+
+Generate multiple items with `.many()`. Use the `unique` option to enforce uniqueness on specific fields:
+
+```ts
+const users = fixture(UserSchema).many(100, {
+  unique: ['email'],
+});
+```
+
+## Overrides
+
+Customize how specific fields are generated:
+
+```ts
+const gen = fixture(UserSchema).override('role', (ctx) => 'admin');
+
+// Or use a predicate for more control:
+const gen2 = fixture(UserSchema).override(
+  (ctx) => ctx.path.at(-1) === 'status',
+  () => 'active',
+);
+```
+
+## Traits
+
+Define reusable override sets and activate them by name:
+
+```ts
+const gen = fixture(UserSchema)
+  .trait('admin', {
+    role: () => 'admin',
+    permissions: (ctx) => ctx.faker.helpers.arrayElements(['read', 'write', 'delete']),
+  })
+  .trait('inactive', {
+    status: () => 'inactive',
+  });
+
+const adminUser = gen.with('admin').one();
+const inactiveAdmin = gen.with('admin', 'inactive').one();
+```
+
+## Derived Fields
+
+Compute field values from other generated fields:
+
+```ts
+const gen = fixture(UserSchema).derive(
+  'displayName',
+  (user) => `${user.firstName} ${user.lastName}`,
+);
+```
+
+## Output Formats
+
+Export generated data to CSV, JSON Lines, or SQL:
+
+```ts
+import { toCSV, toJSONLines, toSQL } from '@l4n3/fakeish/formats';
+
+const users = fixture(UserSchema).many(10);
+
+const csv = toCSV(users);
+const jsonl = toJSONLines(users);
+const sql = toSQL(users, { table: 'users' });
+```
+
+## Negative Testing
+
+Generate intentionally invalid data for testing validation logic:
+
+```ts
+const invalid = fixture(UserSchema).invalid();
+// Produces data that violates the schema constraints
+```
+
+## Next Steps
+
+See the [API Reference](/api) for the full list of methods, types, and configuration options.

@@ -1,0 +1,23 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["../../packages/fakeish/src/index.ts", "../../packages/fakeish/src/formats/index.ts"],
+  "tsconfig": "../../packages/fakeish/tsconfig.json",
+  "plugin": ["typedoc-plugin-markdown"],
+  "out": "content/api",
+  "fileExtension": ".mdx",
+  "hidePageHeader": true,
+  "hideBreadcrumbs": true,
+  "hidePageTitle": false,
+  "entryFileName": "overview",
+  "readme": "none",
+  "disableSources": true,
+  "intentionallyNotExported": [
+    "ObjectOverride",
+    "PredicateOverride",
+    "DotPaths",
+    "CheckDefMap",
+    "PartialOverrideGenerators",
+    "UnwrapArray",
+    "ObjectValueKeys"
+  ]
+}
