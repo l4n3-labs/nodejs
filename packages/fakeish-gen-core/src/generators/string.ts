@@ -9,7 +9,8 @@ export const generateString = (ctx: GenContext<StringNode>): string => {
     return generateFromPattern(constraints.pattern, faker);
   }
 
-  // Check for well-known format types (only if no content constraints)
+  // Check for well-known format types (only if no known prefix, suffix, or includes
+  // constraints)
   const { startsWith: prefix, endsWith: suffix, includes: include, format } = constraints;
 
   if (format && !prefix && !suffix && !include) {
