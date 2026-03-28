@@ -6,7 +6,7 @@
   "type": "module",
   "scripts": {
     "dev": "next",
-    "build": "next build",
+    "build": "pnpm typedoc && next build",
     "start": "next start",
     "typedoc": "typedoc && node --experimental-strip-types scripts/generate-api-meta.ts"
   },
