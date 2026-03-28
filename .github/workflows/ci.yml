@@ -40,3 +40,72 @@ jobs:
 
       - name: Test
         run: pnpm test
+
+  changeset-check:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6
+        with:
+          fetch-depth: 0
+
+      - name: Check for skip-worthy changes only
+        id: check-skip
+        if: github.head_ref != 'changeset-release/main'
+        run: |
+          SKIP_PATTERNS=(
+            '\.test\.ts$'
+            '^docs/'
+            '^configs/'
+            '^\.github/'
+            '^[^/]*\.md$'
+            '^turbo\.json$'
+            '^biome\.json$'
+            '^pnpm-workspace\.yaml$'
+            '^lefthook\.yml$'
+            '^\.nvmrc$'
+            '^codebook\.toml$'
+            '^\.changeset/'
+          )
+
+          COMBINED=$(IFS='|'; echo "${SKIP_PATTERNS[*]}")
+
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+
+          if [ -z "$CHANGED_FILES" ]; then
+            echo "No changed files detected."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          NEEDS_CHANGESET=false
+          while IFS= read -r file; do
+            if ! echo "$file" | grep -qE "$COMBINED"; then
+              echo "File requires changeset: $file"
+              NEEDS_CHANGESET=true
+            fi
+          done <<< "$CHANGED_FILES"
+
+          if [ "$NEEDS_CHANGESET" = "false" ]; then
+            echo "All changes are test/docs/build-only. Skipping changeset check."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: pnpm/action-setup@fc06bc1257f339d1d5d8b3a19a8cae5388b55320 # v5
+        if: steps.check-skip.outputs.skip != 'true'
+
+      - uses: actions/setup-node@53b83947a5a98c8d113130e565377fae1a50d02f # v6
+        if: steps.check-skip.outputs.skip != 'true'
+        with:
+          node-version: 24
+          cache: pnpm
+
+      - name: Install dependencies
+        if: steps.check-skip.outputs.skip != 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Require changeset
+        if: steps.check-skip.outputs.skip != 'true'
+        run: pnpm changeset status --since=origin/main
