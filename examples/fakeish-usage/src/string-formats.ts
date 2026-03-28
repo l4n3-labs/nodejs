@@ -45,3 +45,11 @@ console.log('endsWith "-world":', suffixed);
 
 const containing = fixture(z.string().includes('middle')).one();
 console.log('includes "middle":', containing);
+
+// Regex patterns
+
+const productCode = fixture(z.string().regex(/[A-Z]{2}-\d{4}/)).one();
+console.log('regex product code:', productCode);
+
+const phone = fixture(z.string().regex(/\d{3}-\d{3}-\d{4}/)).one();
+console.log('regex phone:', phone);

@@ -1,8 +1,13 @@
+import { generateFromPattern } from '../regex/generator.js';
 import type { GenContext, StringNode } from '../schema.js';
 
 export const generateString = (ctx: GenContext<StringNode>): string => {
   const { faker } = ctx;
   const { constraints } = ctx.node;
+
+  if (constraints.pattern) {
+    return generateFromPattern(constraints.pattern, faker);
+  }
 
   // Check for well-known format types (only if no content constraints)
   const { startsWith: prefix, endsWith: suffix, includes: include, format } = constraints;

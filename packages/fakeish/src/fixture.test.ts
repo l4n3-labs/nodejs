@@ -722,3 +722,43 @@ describe('ctx.sequence', () => {
     expect(results.map((r) => r.id)).toEqual([0, 1, 2, 3, 4]);
   });
 });
+
+describe('regex pattern generation', () => {
+  it('generates strings matching z.string().regex()', () => {
+    const schema = z.string().regex(/[a-z]{5}/);
+    const result = fixture(schema).one();
+    expect(result).toMatch(/^[a-z]{5}$/);
+  });
+
+  it('generates strings matching complex regex patterns', () => {
+    const schema = z.string().regex(/[A-Z]{2}-\d{4}/);
+    const result = fixture(schema).one();
+    expect(result).toMatch(/^[A-Z]{2}-\d{4}$/);
+  });
+
+  it('generates objects with regex-constrained fields', () => {
+    const schema = z.object({
+      code: z.string().regex(/[A-Z]{3}-\d{3}/),
+      name: z.string(),
+    });
+    const result = fixture(schema).one();
+    expect(result.code).toMatch(/^[A-Z]{3}-\d{3}$/);
+    expect(typeof result.name).toBe('string');
+  });
+
+  it('generates multiple items with regex patterns', () => {
+    const schema = z.string().regex(/\d{3}-\d{4}/);
+    const results = fixture(schema).many(10);
+    for (const result of results) {
+      expect(result).toMatch(/^\d{3}-\d{4}$/);
+    }
+  });
+
+  it('produces deterministic regex output with seed', () => {
+    const schema = z.string().regex(/[a-z]{10}/);
+    const a = fixture(schema, { seed: 42 }).one();
+    const b = fixture(schema, { seed: 42 }).one();
+    expect(a).toBe(b);
+    expect(a).toMatch(/^[a-z]{10}$/);
+  });
+});
