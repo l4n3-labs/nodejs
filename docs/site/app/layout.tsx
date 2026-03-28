@@ -13,7 +13,7 @@ export const metadata = {
 
 const navbar = <Navbar logo={<b>fakeish</b>} projectLink="https://github.com/l4n3/nodejs" />;
 
-const footer = <Footer>MIT {new Date().getFullYear()} © l4n3.</Footer>;
+const footer = <Footer> Apache 2.0 {new Date().getFullYear()} © l4n3.</Footer>;
 
 const RootLayout = async ({ children }: { children: React.ReactNode }) => {
   const pageMap = await getPageMap();

@@ -2,6 +2,7 @@
   "name": "@l4n3/poc-utils",
   "version": "0.0.0",
   "private": true,
+  "license": "Apache-2.0",
   "type": "module",
   "exports": {
     ".": {

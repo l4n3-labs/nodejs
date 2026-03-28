@@ -1,6 +1,7 @@
 {
   "name": "@l4n3/biome-config",
   "private": true,
+  "license": "Apache-2.0",
   "type": "module",
   "exports": {
     "./biome": "./biome.json"
